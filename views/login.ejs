@@ -1,0 +1,41 @@
+<!-- views/login.ejs - หน้าเข้าสู่ระบบ -->
+
+<%- include('./partials/header') %>
+
+<section class="login py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 mx-auto">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="text-center">เข้าสู่ระบบ</h3>
+                    </div>
+                    <div class="card-body">
+                        <form action="/auth/login" method="POST">
+                            <div class="form-group">
+                                <label for="username">ชื่อผู้ใช้</label>
+                                <input type="text" id="username" name="username" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="password">รหัสผ่าน</label>
+                                <input type="password" id="password" name="password" class="form-control" required>
+                            </div>
+                            <div class="form-group">
+                                <button type="submit" class="btn btn-primary btn-block">เข้าสู่ระบบ</button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="card-footer text-center">
+                        <p>ยังไม่มีบัญชี? <a href="/auth/register">ลงทะเบียน</a></p>
+                    </div>
+                </div>
+                <div class="mt-3 text-center">
+                    <p>หรือ</p>
+                    <a href="/register" class="btn btn-secondary">สมัครเป็นสมาชิก NFT</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('./partials/footer') %>

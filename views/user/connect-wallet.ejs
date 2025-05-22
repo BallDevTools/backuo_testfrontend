@@ -1,0 +1,232 @@
+<!-- views/user/connect-wallet.ejs - หน้าเชื่อมต่อกระเป๋า -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">เชื่อมต่อกระเป๋า Metamask</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="connect-wallet-info">
+                    <h3>เชื่อมต่อกระเป๋า Metamask ของคุณ</h3>
+                    <p>การเชื่อมต่อกระเป๋า Metamask จะช่วยให้คุณสามารถใช้งานระบบสมาชิก NFT ได้อย่างเต็มประสิทธิภาพ</p>
+                    <p>คุณสามารถสมัครสมาชิก อัพเกรดแพลน และรับค่าคอมมิชชั่นได้เมื่อเชื่อมต่อกระเป๋าแล้ว</p>
+                    
+                    <div class="metamask-status mt-4">
+                        <h4>สถานะ Metamask</h4>
+                        <div id="metamask-status-display" class="alert alert-warning">
+                            <i class="fas fa-spinner fa-spin"></i> กำลังตรวจสอบสถานะ Metamask...
+                        </div>
+                    </div>
+                    
+                    <div class="network-info mt-4">
+                        <h4>เครือข่ายที่รองรับ</h4>
+                        <div class="card">
+                            <div class="card-body">
+                                <p><strong>ชื่อเครือข่าย:</strong> <%= process.env.NETWORK_NAME || 'Binance Smart Chain' %></p>
+                                <p><strong>ID เครือข่าย:</strong> <%= process.env.NETWORK_ID || '56' %></p>
+                                <p><strong>RPC URL:</strong> <%= process.env.RPC_URL || 'https://bsc-dataseed.binance.org' %></p>
+                                <p><strong>สัญลักษณ์:</strong> BNB</p>
+                                <p><strong>Block Explorer:</strong> https://bscscan.com</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="wallet-connect-box">
+                    <% if (walletAddress) { %>
+                        <!-- กระเป๋าเชื่อมต่อแล้ว -->
+                        <div class="connected-wallet-info">
+                            <div class="card bg-success text-white text-center mb-4">
+                                <div class="card-body">
+                                    <i class="fas fa-check-circle fa-3x mb-3"></i>
+                                    <h3>กระเป๋าเชื่อมต่อแล้ว</h3>
+                                </div>
+                            </div>
+                            
+                            <div class="wallet-details">
+                                <div class="form-group">
+                                    <label>ที่อยู่กระเป๋าของคุณ</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" value="<%= walletAddress %>" readonly>
+                                        <div class="input-group-append">
+                                            <button class="btn btn-primary copy-address-btn">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="wallet-actions mt-4">
+                                    <a href="https://bscscan.com/address/<%= walletAddress %>" target="_blank" class="btn btn-info btn-block mb-3">
+                                        <i class="fas fa-external-link-alt"></i> ดูใน BSCScan
+                                    </a>
+                                    <form action="/user/disconnect-wallet" method="POST">
+                                        <button type="submit" class="btn btn-danger btn-block">
+                                            <i class="fas fa-unlink"></i> ยกเลิกการเชื่อมต่อกระเป๋า
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <!-- ยังไม่ได้เชื่อมต่อกระเป๋า -->
+                        <div class="connect-wallet-box">
+                            <div class="card text-center mb-4">
+                                <div class="card-body">
+                                    <img src="/img/metamask-fox.svg" alt="Metamask" class="mb-3" width="100">
+                                    <h3>เชื่อมต่อกระเป๋า Metamask</h3>
+                                    <p>กรุณาเชื่อมต่อกระเป๋า Metamask ของคุณเพื่อใช้งานระบบสมาชิก NFT</p>
+                                </div>
+                            </div>
+                            
+                            <div class="wallet-connect-actions">
+                                <button id="connect-metamask-btn" class="btn btn-primary btn-lg btn-block mb-3">
+                                    <i class="fas fa-wallet"></i> เชื่อมต่อ Metamask
+                                </button>
+                                
+                                <div class="manual-connect mt-4">
+                                    <h5>หรือใส่ที่อยู่กระเป๋าด้วยตนเอง</h5>
+                                    <form action="/user/connect-wallet" method="POST">
+                                        <div class="form-group">
+                                            <div class="input-group">
+                                                <input type="text" name="walletAddress" class="form-control" placeholder="0x..." pattern="0x[a-fA-F0-9]{40}" required>
+                                                <div class="input-group-append">
+                                                    <button type="submit" class="btn btn-success">
+                                                        <i class="fas fa-link"></i> เชื่อมต่อ
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">กรุณาใส่ที่อยู่กระเป๋า Metamask ที่ถูกต้อง (ขึ้นต้นด้วย 0x ตามด้วยตัวอักษร 40 ตัว)</small>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    <% } %>
+                    
+                    <div class="metamask-help mt-4">
+                        <h4>ยังไม่มี Metamask?</h4>
+                        <p>คุณสามารถติดตั้ง Metamask ได้โดยไปที่เว็บไซต์ทางการของ Metamask</p>
+                        <a href="https://metamask.io/download.html" target="_blank" class="btn btn-secondary btn-block">
+                            <i class="fas fa-download"></i> ติดตั้ง Metamask
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const metamaskStatusDisplay = document.getElementById('metamask-status-display');
+        const connectMetamaskBtn = document.getElementById('connect-metamask-btn');
+        const copyAddressBtn = document.querySelector('.copy-address-btn');
+        
+        // ตรวจสอบสถานะ Metamask
+        if (typeof window.ethereum !== 'undefined') {
+            metamaskStatusDisplay.className = 'alert alert-success';
+            metamaskStatusDisplay.innerHTML = '<i class="fas fa-check-circle"></i> พบ Metamask บนเบราว์เซอร์ของคุณ';
+        } else {
+            metamaskStatusDisplay.className = 'alert alert-danger';
+            metamaskStatusDisplay.innerHTML = '<i class="fas fa-times-circle"></i> ไม่พบ Metamask กรุณาติดตั้ง Metamask ก่อนใช้งาน';
+        }
+        
+        // เชื่อมต่อ Metamask
+        if (connectMetamaskBtn) {
+            connectMetamaskBtn.addEventListener('click', async () => {
+                if (typeof window.ethereum === 'undefined') {
+                    alert('กรุณาติดตั้ง Metamask ก่อนใช้งาน');
+                    return;
+                }
+                
+                try {
+                    // ขอสิทธิ์เข้าถึงบัญชี
+                    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                    const userAddress = accounts[0];
+                    
+                    // ตรวจสอบเครือข่าย
+                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    const currentNetworkId = parseInt(chainId, 16);
+                    const requiredNetworkId = <%= process.env.NETWORK_ID || 56 %>;
+                    
+                    if (currentNetworkId !== requiredNetworkId) {
+                        try {
+                            // ขอเปลี่ยนเครือข่าย
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0x' + requiredNetworkId.toString(16) }],
+                            });
+                        } catch (switchError) {
+                            if (switchError.code === 4902) {
+                                alert('เครือข่ายที่ต้องการไม่มีในกระเป๋าของคุณ กรุณาเพิ่มเครือข่ายด้วยตนเอง');
+                                return;
+                            }
+                            alert('เกิดข้อผิดพลาดในการเปลี่ยนเครือข่าย: ' + switchError.message);
+                            return;
+                        }
+                    }
+                    
+                    // ส่งฟอร์มเชื่อมต่อกระเป๋า
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '/user/connect-wallet';
+                    
+                    const input = document.createElement('input');
+                    input.type = 'hidden';
+                    input.name = 'walletAddress';
+                    input.value = userAddress;
+                    
+                    form.appendChild(input);
+                    document.body.appendChild(form);
+                    form.submit();
+                } catch (error) {
+                    console.error('Error connecting to MetaMask:', error);
+                    alert('เกิดข้อผิดพลาดในการเชื่อมต่อกับ MetaMask: ' + error.message);
+                }
+            });
+        }
+        
+        // คัดลอกที่อยู่กระเป๋า
+        if (copyAddressBtn) {
+            copyAddressBtn.addEventListener('click', function() {
+                const addressInput = this.parentNode.previousElementSibling;
+                addressInput.select();
+                document.execCommand('copy');
+                alert('คัดลอกที่อยู่กระเป๋าเรียบร้อยแล้ว');
+            });
+        }
+    });
+</script>
+
+<style>
+    .wallet-connect-box {
+        border: 1px solid #eee;
+        padding: 2rem;
+        border-radius: 10px;
+        background-color: #f8f9fa;
+    }
+    
+    .wallet-details {
+        margin-top: 2rem;
+    }
+    
+    .copy-address-btn {
+        cursor: pointer;
+    }
+    
+    .metamask-status-display {
+        padding: 1rem;
+        border-radius: 5px;
+    }
+    
+    .connected-wallet-info {
+        text-align: center;
+    }
+</style>
+
+<%- include('../partials/footer') %>

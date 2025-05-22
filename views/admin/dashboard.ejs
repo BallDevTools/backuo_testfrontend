@@ -1,0 +1,311 @@
+<!-- views/admin/dashboard.ejs - หน้าแดชบอร์ดสำหรับแอดมิน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon primary">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.totalMembers %></div>
+            <div class="dashboard-stat-label">จำนวนสมาชิกทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon success">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.totalRevenue %> USDT</div>
+            <div class="dashboard-stat-label">รายได้ทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon warning">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.totalCommission %> USDT</div>
+            <div class="dashboard-stat-label">ค่าคอมมิชชั่นทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon <%= contractStatus.isPaused ? 'danger' : 'success' %>">
+            <i class="fas fa-<%= contractStatus.isPaused ? 'pause' : 'play' %>"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %></div>
+            <div class="dashboard-stat-label">สถานะสัญญา</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ภาพรวมการเงิน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="financial-overview">
+                    <div class="financial-chart-container">
+                        <canvas id="financialChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="financial-details mt-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินเจ้าของ</h4>
+                                    <div class="financial-value"><%= systemStats.ownerFunds %> USDT</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินค่าธรรมเนียม</h4>
+                                    <div class="financial-value"><%= systemStats.feeFunds %> USDT</div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินกองทุน</h4>
+                                    <div class="financial-value"><%= systemStats.fundFunds %> USDT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">สถานะแพลน</h2>
+                <div class="dashboard-card-actions">
+                    <a href="/admin/plans" class="btn btn-primary btn-sm">จัดการแพลน</a>
+                </div>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อแพลน</th>
+                                <th>ราคา</th>
+                                <th>สมาชิกต่อรอบ</th>
+                                <th>รอบปัจจุบัน</th>
+                                <th>สมาชิกในรอบ</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plans-table-body">
+                            <!-- ข้อมูลแพลนจะถูกโหลดด้วย JavaScript -->
+                            <tr>
+                                <td colspan="7" class="text-center">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">สถานะระบบ</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <ul class="system-status-list">
+                    <li>
+                        <span class="status-label">สถานะสัญญา:</span>
+                        <span class="status-value <%= contractStatus.isPaused ? 'text-danger' : 'text-success' %>">
+                            <%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="status-label">จำนวนสมาชิก:</span>
+                        <span class="status-value"><%= contractStatus.memberCount %> คน</span>
+                    </li>
+                    <li>
+                        <span class="status-label">จำนวนแพลน:</span>
+                        <span class="status-value"><%= contractStatus.currentPlanCount %> แพลน</span>
+                    </li>
+                    <li>
+                        <span class="status-label">ยอดเงินในสัญญา:</span>
+                        <span class="status-value"><%= contractStatus.totalBalance %> USDT</span>
+                    </li>
+                    <li>
+                        <span class="status-label">คำขอถอนฉุกเฉิน:</span>
+                        <span class="status-value <%= contractStatus.hasEmergencyRequest ? 'text-warning' : 'text-success' %>">
+                            <%= contractStatus.hasEmergencyRequest ? 'มี' : 'ไม่มี' %>
+                        </span>
+                    </li>
+                    <% if (contractStatus.hasEmergencyRequest) { %>
+                    <li>
+                        <span class="status-label">เวลาคงเหลือ:</span>
+                        <span class="status-value text-warning">
+                            <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง 
+                            <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที
+                        </span>
+                    </li>
+                    <% } %>
+                </ul>
+                
+                <div class="system-actions mt-3">
+                    <a href="/admin/settings" class="btn btn-primary btn-block">ตั้งค่าระบบ</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">การเติบโตของสมาชิก</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="members-growth-chart-container">
+                    <canvas id="membersGrowthChart" width="300" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ทางลัด</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="shortcut-buttons">
+                    <a href="/admin/members" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-users"></i> จัดการสมาชิก
+                    </a>
+                    <a href="/admin/finance" class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-money-bill-wave"></i> จัดการการเงิน
+                    </a>
+                    <form action="/admin/settings/set-paused" method="POST" class="mb-2">
+                        <input type="hidden" name="isPaused" value="<%= !contractStatus.isPaused %>">
+                        <button type="submit" class="btn btn-<%= contractStatus.isPaused ? 'warning' : 'danger' %> btn-block">
+                            <i class="fas fa-<%= contractStatus.isPaused ? 'play' : 'pause' %>"></i> 
+                            <%= contractStatus.isPaused ? 'เริ่มการทำงานสัญญา' : 'หยุดการทำงานสัญญา' %>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // โหลดข้อมูลแพลน
+        loadPlans();
+        
+        // สร้างกราฟภาพรวมการเงิน
+        createFinancialChart();
+        
+        // สร้างกราฟการเติบโตของสมาชิก
+        createMembersGrowthChart();
+    });
+    
+    // ฟังก์ชันโหลดข้อมูลแพลน
+    async function loadPlans() {
+        try {
+            // สมมติให้มีเอนด์พอยท์ API สำหรับดึงข้อมูลแพลน
+            const response = await fetch('/api/plans');
+            const plans = await response.json();
+            
+            const tableBody = document.getElementById('plans-table-body');
+            tableBody.innerHTML = '';
+            
+            plans.forEach(plan => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${plan.id}</td>
+                    <td>${plan.name}</td>
+                    <td>${plan.price} USDT</td>
+                    <td>${plan.membersPerCycle}</td>
+                    <td>${plan.currentCycle}</td>
+                    <td>${plan.membersInCurrentCycle} / ${plan.membersPerCycle}</td>
+                    <td>
+                        <span class="badge badge-${plan.isActive ? 'success' : 'danger'}">
+                            ${plan.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                        </span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading plans:', error);
+            document.getElementById('plans-table-body').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td>
+                </tr>
+            `;
+        }
+    }
+    
+    // ฟังก์ชันสร้างกราฟภาพรวมการเงิน
+    function createFinancialChart() {
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        
+        const financialChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['เงินเจ้าของ', 'เงินค่าธรรมเนียม', 'เงินกองทุน'],
+                datasets: [{
+                    data: [
+                        <%= systemStats.ownerFunds %>,
+                        <%= systemStats.feeFunds %>,
+                        <%= systemStats.fundFunds %>
+                    ],
+                    backgroundColor: [
+                        '#3498db',
+                        '#2ecc71',
+                        '#f39c12'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+    
+    // ฟังก์ชันสร้างกราฟการเติบโตของสมาชิก
+    function createMembersGrowthChart() {
+        const ctx = document.getElementById('membersGrowthChart').getContext('2d');
+        
+        // ข้อมูลตัวอย่าง (ในระบบจริงควรดึงข้อมูลจาก API)
+        const membersGrowthChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.'],
+                datasets: [{
+                    label: 'จำนวนสมาชิกใหม่',
+                    data: [10, 15, 20, 25, 30, <%= systemStats.totalMembers %>],
+                    backgroundColor: 'rgba(52, 152, 219, 0.2)',
+                    borderColor: '#3498db',
+                    borderWidth: 2,
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

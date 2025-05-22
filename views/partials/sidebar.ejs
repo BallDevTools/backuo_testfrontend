@@ -1,0 +1,54 @@
+<!-- views/partials/user-sidebar.ejs - เมนูด้านข้างสำหรับผู้ใช้ทั่วไป -->
+<div class="dashboard-sidebar">
+    <div class="dashboard-brand">
+        <img src="/img/logo.png" alt="Crypto Membership NFT Logo">
+        <div class="dashboard-brand-name">Crypto Membership</div>
+    </div>
+    
+    <div class="dashboard-user">
+        <div class="dashboard-user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+        <div class="dashboard-user-name"><%= user.username %></div>
+        <div class="dashboard-user-role">สมาชิก</div>
+    </div>
+    
+    <nav class="dashboard-nav">
+        <div class="dashboard-nav-item">
+            <a href="/user/dashboard" class="dashboard-nav-link <%= title === 'แดชบอร์ดสมาชิก' ? 'active' : '' %>">
+                <i class="fas fa-tachometer-alt dashboard-nav-icon"></i>
+                แดชบอร์ด
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/user/profile" class="dashboard-nav-link <%= title === 'โปรไฟล์' ? 'active' : '' %>">
+                <i class="fas fa-user dashboard-nav-icon"></i>
+                โปรไฟล์
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/user/upgrade" class="dashboard-nav-link <%= title === 'อัพเกรดแพลน' ? 'active' : '' %>">
+                <i class="fas fa-arrow-up dashboard-nav-icon"></i>
+                อัพเกรดแพลน
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/user/referrals" class="dashboard-nav-link <%= title === 'การแนะนำ' ? 'active' : '' %>">
+                <i class="fas fa-users dashboard-nav-icon"></i>
+                การแนะนำ
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/user/connect-wallet" class="dashboard-nav-link <%= title === 'เชื่อมต่อกระเป๋า Metamask' ? 'active' : '' %>">
+                <i class="fas fa-wallet dashboard-nav-icon"></i>
+                เชื่อมต่อกระเป๋า
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/auth/logout" class="dashboard-nav-link">
+                <i class="fas fa-sign-out-alt dashboard-nav-icon"></i>
+                ออกจากระบบ
+            </a>
+        </div>
+    </nav>
+</div>

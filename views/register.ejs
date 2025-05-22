@@ -1,0 +1,344 @@
+<%- include('./partials/header') %>
+
+    <section class="register py-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3 class="text-center">สมัครสมาชิก NFT</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="plan-info mb-3">
+                                        <h4>แพลนเริ่มต้น</h4>
+                                        <div class="plan-card">
+                                            <div class="plan-header">
+                                                <h3>แพลน <%= startPlan.name %>
+                                                </h3>
+                                                <div class="plan-price">
+                                                    <%= startPlan.price %> USDT
+                                                </div>
+                                            </div>
+                                            <div class="plan-features">
+                                                <ul>
+                                                    <li>สมาชิกต่อรอบ: <%= startPlan.membersPerCycle %> คน</li>
+                                                    <li>รอบปัจจุบัน: <%= startPlan.currentCycle %>
+                                                    </li>
+                                                    <li>สมาชิกในรอบปัจจุบัน: <%= startPlan.membersInCurrentCycle %> /
+                                                            <%= startPlan.membersPerCycle %>
+                                                    </li>
+                                                    <li>รองรับระบบแนะนำ (Referral)</li>
+                                                    <li>รับ NFT สมาชิก</li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <form id="register-form" action="/register" method="POST">
+                                        <div class="form-group">
+                                            <label for="walletAddress">ที่อยู่กระเป๋า</label>
+                                            <div class="input-group">
+                                                <input type="text" id="walletAddress" name="walletAddress"
+                                                    class="form-control" readonly required>
+                                                <div class="input-group-append">
+                                                    <button type="button" id="connect-wallet-btn"
+                                                        class="btn btn-primary">เชื่อมต่อกระเป๋า</button>
+                                                </div>
+                                            </div>
+                                            <small class="form-text text-muted">กรุณาเชื่อมต่อกระเป๋า MetaMask
+                                                ของคุณ</small>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="upline">ผู้แนะนำ (ถ้ามี)</label>
+                                            <input type="text" id="upline" name="upline" class="form-control"
+                                                value="<%= ref %>">
+                                            <small class="form-text text-muted">ใส่ที่อยู่กระเป๋าของผู้แนะนำ
+                                                (ถ้ามี)</small>
+                                        </div>
+
+                                        <div class="form-group token-approval" style="display: none;">
+                                            <div class="alert alert-info">
+                                                <p><strong>ขั้นตอนที่ 1:</strong> อนุญาตให้สัญญาใช้โทเคน USDT ของคุณ</p>
+                                                <button type="button" id="approve-token-btn"
+                                                    class="btn btn-warning btn-block mt-2">อนุญาตโทเคน USDT</button>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group register-action" style="display: none;">
+                                            <div class="alert alert-info">
+                                                <p><strong>ขั้นตอนที่ 2:</strong> สมัครสมาชิกและรับ NFT</p>
+                                                <button type="submit"
+                                                    class="btn btn-success btn-block mt-2">สมัครสมาชิก</button>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                    <div class="mt-3">
+                                        <p>หมายเหตุ:</p>
+                                        <ul>
+                                            <li>คุณต้องมี USDT อย่างน้อย <%= startPlan.price %> ในกระเป๋าของคุณ</li>
+                                            <li>NFT สมาชิกของคุณไม่สามารถโอนให้ผู้อื่นได้</li>
+                                            <li>คุณสามารถออกจากการเป็นสมาชิกและรับเงินคืน 30% หลังจาก 30 วัน</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- เพิ่ม JavaScript เฉพาะสำหรับหน้านี้ -->
+    <script>
+        async function checkIfOwner(userAddress, contractAddress) {
+    try {
+        const web3 = new Web3(window.ethereum);
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+        const contractOwner = await contract.methods.owner().call();
+        return userAddress.toLowerCase() === contractOwner.toLowerCase();
+    } catch (error) {
+        console.error('Error checking owner:', error);
+        return false;
+    }
+}
+        document.addEventListener('DOMContentLoaded', async () => {
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const approveTokenBtn = document.getElementById('approve-token-btn');
+            const walletAddressInput = document.getElementById('walletAddress');
+            const uplineInput = document.getElementById('upline');
+            const tokenApprovalSection = document.querySelector('.token-approval');
+            const registerActionSection = document.querySelector('.register-action');
+            const registerForm = document.getElementById('register-form');
+
+            // ดึงค่าจาก config
+            const contractAddress = document.querySelector('meta[name="contract-address"]').content;
+            const usdtAddress = document.querySelector('meta[name="usdt-address"]').content;
+            const planPrice = '<%= startPlan.price %>'; // ราคาแพลน
+
+            // เชื่อมต่อกระเป๋า
+            connectWalletBtn.addEventListener('click', async () => {
+                const address = await window.app.connectMetaMask();
+
+                if (address) {
+                    walletAddressInput.value = address;
+                    connectWalletBtn.textContent = 'เชื่อมต่อแล้ว';
+                    connectWalletBtn.disabled = true;
+
+                    // ตรวจสอบว่าเป็นสมาชิกอยู่แล้วหรือไม่
+                    try {
+                        const isMemberResponse = await fetch(`/api/members/check-member?address=${address}`);
+                        const isMemberData = await isMemberResponse.json();
+
+                        if (isMemberData.isMember) {
+                            alert('กระเป๋านี้เป็นสมาชิกอยู่แล้ว ไม่สามารถสมัครซ้ำได้');
+                            return;
+                        }
+
+                        // ตรวจสอบการอนุญาตโทเคน
+                        const allowance = await window.app.checkAllowance(usdtAddress, address, contractAddress);
+                        const requiredAmount = window.app.toWei(planPrice, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+
+                        if (BigInt(allowance) >= BigInt(requiredAmount)) {
+                            // อนุญาตแล้ว แสดงปุ่มสมัครสมาชิก
+                            registerActionSection.style.display = 'block';
+                        } else {
+                            // ยังไม่ได้อนุญาต แสดงปุ่มอนุญาตโทเคน
+                            tokenApprovalSection.style.display = 'block';
+
+                            // ตรวจสอบยอดเงิน USDT
+                            try {
+                                const balanceWei = await window.ethereum.request({
+                                    method: 'eth_call',
+                                    params: [{
+                                        to: usdtAddress,
+                                        data: `0x70a08231000000000000000000000000${address.slice(2)}`
+                                    }, 'latest']
+                                });
+
+                                const balance = parseInt(balanceWei, 16) / 10 ** 6; // USDT มีทศนิยม 6 ตำแหน่ง
+
+                                if (balance < parseFloat(planPrice)) {
+                                    alert(`ยอดเงิน USDT ของคุณไม่เพียงพอ (${balance.toFixed(2)} USDT) สำหรับการสมัครสมาชิก (${planPrice} USDT)`);
+                                }
+                            } catch (error) {
+                                console.error('Error checking USDT balance:', error);
+                            }
+                        }
+                    } catch (error) {
+                        console.error('Error checking member status:', error);
+                        alert('เกิดข้อผิดพลาดในการตรวจสอบสถานะสมาชิก');
+                    }
+                }
+            });
+
+            // อนุญาตโทเคน
+            approveTokenBtn.addEventListener('click', async () => {
+                const address = walletAddressInput.value;
+
+                if (address) {
+                    const requiredAmount = window.app.toWei(planPrice, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+                    const result = await window.app.approveToken(usdtAddress, contractAddress, requiredAmount);
+
+                    if (result) {
+                        tokenApprovalSection.innerHTML = '<div class="alert alert-success">อนุญาตโทเคนสำเร็จ</div>';
+                        registerActionSection.style.display = 'block';
+                    }
+                }
+            });
+
+            // ตรวจสอบข้อมูลก่อนส่งฟอร์ม
+            registerForm.addEventListener('submit', async function (e) {
+                e.preventDefault();
+
+                const walletAddress = walletAddressInput.value;
+                const upline = uplineInput.value;
+
+                // ตรวจสอบที่อยู่กระเป๋า
+                if (!walletAddress) {
+                    alert('กรุณาเชื่อมต่อกระเป๋า Metamask ก่อนสมัครสมาชิก');
+                    return;
+                }
+
+                // ตรวจสอบรูปแบบที่อยู่กระเป๋า
+                if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
+                    alert('รูปแบบที่อยู่กระเป๋าไม่ถูกต้อง');
+                    return;
+                }
+
+                // ตรวจสอบที่อยู่ผู้แนะนำ (ถ้ามี)
+                if (upline && !/^0x[a-fA-F0-9]{40}$/.test(upline)) {
+                    alert('รูปแบบที่อยู่ผู้แนะนำไม่ถูกต้อง');
+                    return;
+                }
+
+                // ตรวจสอบว่าที่อยู่ผู้แนะนำไม่ใช่ตัวเอง
+                if (upline && upline.toLowerCase() === walletAddress.toLowerCase()) {
+                    alert('ไม่สามารถใช้ที่อยู่ของตัวเองเป็นผู้แนะนำได้');
+                    return;
+                }
+
+                // ตรวจสอบว่าผู้แนะนำเป็นสมาชิกหรือไม่ (ถ้ามีผู้แนะนำ)
+                if (upline) {
+                    try {
+                        // เช็คว่า upline มีรูปแบบถูกต้องหรือไม่
+                        if (!/^0x[a-fA-F0-9]{40}$/.test(upline)) {
+                            alert('รูปแบบที่อยู่ผู้แนะนำไม่ถูกต้อง');
+                            return;
+                        }
+
+                        console.log("ตรวจสอบผู้แนะนำ:", upline);
+                        const response = await fetch(`/api/members/check-member?address=${upline}`);
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+                        console.log("ข้อมูลผู้แนะนำ:", data);
+
+                        if (!data.isMember) {
+                            alert('ผู้แนะนำไม่ได้เป็นสมาชิก');
+                            return;
+                        }
+
+                        if (data.planId < 1) {
+                            alert('แพลนของผู้แนะนำต่ำกว่าแพลนที่คุณต้องการสมัคร');
+                            return;
+                        }
+                    } catch (error) {
+                        console.error('Error checking upline status:', error);
+                        alert('เกิดข้อผิดพลาดในการตรวจสอบสถานะผู้แนะนำ: ' + error.message);
+                        return;
+                    }
+                }
+
+                // ตรวจสอบการอนุญาตโทเคน
+                try {
+                    const allowance = await window.app.checkAllowance(usdtAddress, walletAddress, contractAddress);
+                    const requiredAmount = window.app.toWei(planPrice, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+
+                    if (BigInt(allowance) < BigInt(requiredAmount)) {
+                        alert('คุณยังไม่ได้อนุญาตโทเคน USDT กรุณาอนุญาตโทเคนก่อนสมัครสมาชิก');
+                        tokenApprovalSection.style.display = 'block';
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking token allowance:', error);
+                    alert('เกิดข้อผิดพลาดในการตรวจสอบการอนุญาตโทเคน');
+                    return;
+                }
+
+                // ตรวจสอบยอดเงิน USDT
+                try {
+                    const balanceWei = await window.ethereum.request({
+                        method: 'eth_call',
+                        params: [{
+                            to: usdtAddress,
+                            data: `0x70a08231000000000000000000000000${walletAddress.slice(2)}`
+                        }, 'latest']
+                    });
+
+                    const balance = parseInt(balanceWei, 16) / 10 ** 6; // USDT มีทศนิยม 6 ตำแหน่ง
+
+                    if (balance < parseFloat(planPrice)) {
+                        alert(`ยอดเงิน USDT ของคุณไม่เพียงพอ (${balance.toFixed(2)} USDT) สำหรับการสมัครสมาชิก (${planPrice} USDT)`);
+                        return;
+                    }
+                } catch (error) {
+                    console.error('Error checking USDT balance:', error);
+                    alert('เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน USDT');
+                    return;
+                }
+
+                // ตรวจสอบว่าเป็นเครือข่ายที่ถูกต้อง
+                try {
+                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                    const currentNetworkId = parseInt(chainId, 16);
+                    const requiredNetworkId = parseInt(document.querySelector('meta[name="network-id"]').content || '56');
+
+                    if (currentNetworkId !== requiredNetworkId) {
+                        if (confirm(`คุณกำลังใช้เครือข่ายที่ไม่ถูกต้อง ต้องการเปลี่ยนไปยังเครือข่าย ${document.querySelector('meta[name="network-name"]').content || 'Binance Smart Chain'} หรือไม่?`)) {
+                            try {
+                                await window.ethereum.request({
+                                    method: 'wallet_switchEthereumChain',
+                                    params: [{ chainId: '0x' + requiredNetworkId.toString(16) }]
+                                });
+
+                                // รอให้เปลี่ยนเครือข่ายเสร็จ
+                                setTimeout(() => {
+                                    alert('เปลี่ยนเครือข่ายสำเร็จ กรุณาสมัครสมาชิกอีกครั้ง');
+                                }, 1000);
+
+                                return;
+                            } catch (switchError) {
+                                if (switchError.code === 4902) {
+                                    alert('เครือข่ายที่ต้องการไม่มีในกระเป๋าของคุณ กรุณาเพิ่มเครือข่ายด้วยตนเอง');
+                                } else {
+                                    alert('เกิดข้อผิดพลาดในการเปลี่ยนเครือข่าย: ' + switchError.message);
+                                }
+                                return;
+                            }
+                        } else {
+                            return;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error checking network:', error);
+                }
+
+                // ยืนยันการสมัครสมาชิก
+                if (confirm('คุณแน่ใจหรือไม่ที่จะสมัครสมาชิก? การกระทำนี้จะโอน USDT จำนวน ' + planPrice + ' ออกจากกระเป๋าของคุณ')) {
+                    // ทุกอย่างผ่านการตรวจสอบแล้ว ส่งฟอร์ม
+                    this.submit();
+                }
+            });
+        });
+    </script>
+
+    <%- include('./partials/footer') %>

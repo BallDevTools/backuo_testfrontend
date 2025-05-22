@@ -1,0 +1,262 @@
+<!-- views/user/upgrade.ejs - หน้าอัพเกรดแพลน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">อัพเกรดแพลน</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="current-plan">
+                    <h3>แพลนปัจจุบัน</h3>
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <h3>แพลน <%= currentPlan.name %></h3>
+                            <div class="plan-price"><%= currentPlan.price %> USDT</div>
+                        </div>
+                        <div class="plan-features">
+                            <ul>
+                                <li>สมาชิกต่อรอบ: <%= currentPlan.membersPerCycle %> คน</li>
+                                <li>รอบปัจจุบัน: <%= memberInfo.cycleNumber %></li>
+                                <li>ค่าคอมมิชชั่น: สูงขึ้นตามแพลน</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="next-plan">
+                    <h3>แพลนถัดไป</h3>
+                    <% if (nextPlan) { %>
+                        <div class="plan-card">
+                            <div class="plan-header">
+                                <h3>แพลน <%= nextPlan.name %></h3>
+                                <div class="plan-price"><%= nextPlan.price %> USDT</div>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <li>สมาชิกต่อรอบ: <%= nextPlan.membersPerCycle %> คน</li>
+                                    <li>รอบปัจจุบัน: <%= nextPlan.currentCycle %></li>
+                                    <li>สมาชิกในรอบปัจจุบัน: <%= nextPlan.membersInCurrentCycle %> / <%= nextPlan.membersPerCycle %></li>
+                                    <li>ค่าคอมมิชชั่นเพิ่มขึ้น!</li>
+                                </ul>
+                            </div>
+                        </div>
+                    <% } else { %>
+                        <div class="alert alert-info">
+                            <p>คุณอยู่ในแพลนสูงสุดแล้ว</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+        </div>
+
+        <% if (nextPlan) { %>
+            <div class="upgrade-section mt-4">
+                <div class="alert alert-info">
+                    <p>การอัพเกรดจะใช้เงินเพิ่มเติม: <strong><%= nextPlan.price - currentPlan.price %> USDT</strong></p>
+                    <p>หลังจากอัพเกรด NFT ของคุณจะถูกอัพเดทเป็นแพลน <%= nextPlan.name %> โดยอัตโนมัติ</p>
+                </div>
+
+                <form id="upgrade-form" action="/user/upgrade" method="POST">
+                    <input type="hidden" name="newPlanId" value="<%= nextPlan.id %>">
+                    <input type="hidden" name="priceDifference" value="<%= nextPlan.price - currentPlan.price %>">
+                    
+                    <div class="form-group token-approval" style="display: none;">
+                        <div class="alert alert-warning">
+                            <p><strong>ขั้นตอนที่ 1:</strong> อนุญาตให้สัญญาใช้โทเคน USDT ของคุณ</p>
+                            <button type="button" id="approve-token-btn" class="btn btn-warning btn-block mt-2">อนุญาตโทเคน USDT</button>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <button type="submit" class="btn btn-primary btn-block">ยืนยันการอัพเกรดแพลน</button>
+                    </div>
+                </form>
+                
+                <p class="mt-3">
+                    <strong>หมายเหตุ:</strong> หลังจากอัพเกรด คุณต้องรอ 1 วันก่อนที่จะสามารถอัพเกรดอีกครั้ง
+                </p>
+            </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- เพิ่ม JavaScript เฉพาะสำหรับหน้านี้ -->
+<script>
+    document.addEventListener('DOMContentLoaded', async () => {
+    const upgradeForm = document.getElementById('upgrade-form');
+    const tokenApprovalSection = document.querySelector('.token-approval');
+    const approveTokenBtn = document.getElementById('approve-token-btn');
+    
+    if (upgradeForm && window.ethereum && window.ethereum.selectedAddress) {
+        // ดึงค่าจาก meta tags
+        const contractAddress = document.querySelector('meta[name="contract-address"]').content;
+        const usdtAddress = document.querySelector('meta[name="usdt-address"]').content;
+        const priceDifference = document.querySelector('input[name="priceDifference"]').value;
+        const newPlanId = document.querySelector('input[name="newPlanId"]').value;
+        
+        // ตรวจสอบการอนุญาตโทเคน
+        try {
+            const userAddress = window.ethereum.selectedAddress;
+            const allowance = await window.app.checkAllowance(
+                usdtAddress, 
+                userAddress, 
+                contractAddress
+            );
+            const requiredAmount = window.app.toWei(priceDifference, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+            
+            if (BigInt(allowance) < BigInt(requiredAmount)) {
+                // ยังไม่ได้อนุญาต แสดงส่วนอนุญาตโทเคน
+                tokenApprovalSection.style.display = 'block';
+                
+                // ตรวจสอบยอดเงิน USDT
+                try {
+                    const balanceWei = await window.ethereum.request({
+                        method: 'eth_call',
+                        params: [{
+                            to: usdtAddress,
+                            data: `0x70a08231000000000000000000000000${userAddress.slice(2)}`
+                        }, 'latest']
+                    });
+                    
+                    const balance = parseInt(balanceWei, 16) / 10**6; // USDT มีทศนิยม 6 ตำแหน่ง
+                    
+                    if (balance < parseFloat(priceDifference)) {
+                        alert(`ยอดเงิน USDT ของคุณไม่เพียงพอ (${balance.toFixed(2)} USDT) สำหรับการอัพเกรดแพลน (${priceDifference} USDT)`);
+                    }
+                } catch (error) {
+                    console.error('Error checking USDT balance:', error);
+                }
+            }
+        } catch (error) {
+            console.error('Error checking allowance:', error);
+        }
+        
+        // อนุญาตโทเคน
+        if (approveTokenBtn) {
+            approveTokenBtn.addEventListener('click', async () => {
+                const address = window.ethereum.selectedAddress;
+                
+                if (address) {
+                    try {
+                        const requiredAmount = window.app.toWei(priceDifference, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+                        const result = await window.app.approveToken(usdtAddress, contractAddress, requiredAmount);
+                        
+                        if (result) {
+                            tokenApprovalSection.innerHTML = '<div class="alert alert-success">อนุญาตโทเคนสำเร็จ คุณสามารถอัพเกรดแพลนได้ทันที</div>';
+                        }
+                    } catch (error) {
+                        console.error('Error approving token:', error);
+                        alert('เกิดข้อผิดพลาดในการอนุญาตโทเคน: ' + error.message);
+                    }
+                }
+            });
+        }
+        
+        // ตรวจสอบข้อมูลก่อนส่งฟอร์ม
+        upgradeForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const userAddress = window.ethereum.selectedAddress;
+            
+            // ตรวจสอบการอนุญาตโทเคน
+            try {
+                const allowance = await window.app.checkAllowance(usdtAddress, userAddress, contractAddress);
+                const requiredAmount = window.app.toWei(priceDifference, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
+                
+                if (BigInt(allowance) < BigInt(requiredAmount)) {
+                    alert('คุณยังไม่ได้อนุญาตโทเคน USDT กรุณาอนุญาตโทเคนก่อนอัพเกรดแพลน');
+                    tokenApprovalSection.style.display = 'block';
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking token allowance:', error);
+                alert('เกิดข้อผิดพลาดในการตรวจสอบการอนุญาตโทเคน');
+                return;
+            }
+            
+            // ตรวจสอบยอดเงิน USDT
+            try {
+                const balanceWei = await window.ethereum.request({
+                    method: 'eth_call',
+                    params: [{
+                        to: usdtAddress,
+                        data: `0x70a08231000000000000000000000000${userAddress.slice(2)}`
+                    }, 'latest']
+                });
+                
+                const balance = parseInt(balanceWei, 16) / 10**6; // USDT มีทศนิยม 6 ตำแหน่ง
+                
+                if (balance < parseFloat(priceDifference)) {
+                    alert(`ยอดเงิน USDT ของคุณไม่เพียงพอ (${balance.toFixed(2)} USDT) สำหรับการอัพเกรดแพลน (${priceDifference} USDT)`);
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking USDT balance:', error);
+                alert('เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน USDT');
+                return;
+            }
+            
+            // ตรวจสอบว่าเป็นเครือข่ายที่ถูกต้อง
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                const currentNetworkId = parseInt(chainId, 16);
+                const requiredNetworkId = parseInt(document.querySelector('meta[name="network-id"]').content || '56');
+                
+                if (currentNetworkId !== requiredNetworkId) {
+                    if (confirm(`คุณกำลังใช้เครือข่ายที่ไม่ถูกต้อง ต้องการเปลี่ยนไปยังเครือข่าย ${document.querySelector('meta[name="network-name"]').content || 'Binance Smart Chain'} หรือไม่?`)) {
+                        try {
+                            await window.ethereum.request({
+                                method: 'wallet_switchEthereumChain',
+                                params: [{ chainId: '0x' + requiredNetworkId.toString(16) }]
+                            });
+                            
+                            // รอให้เปลี่ยนเครือข่ายเสร็จ
+                            setTimeout(() => {
+                                alert('เปลี่ยนเครือข่ายสำเร็จ กรุณาอัพเกรดแพลนอีกครั้ง');
+                            }, 1000);
+                            
+                            return;
+                        } catch (switchError) {
+                            if (switchError.code === 4902) {
+                                alert('เครือข่ายที่ต้องการไม่มีในกระเป๋าของคุณ กรุณาเพิ่มเครือข่ายด้วยตนเอง');
+                            } else {
+                                alert('เกิดข้อผิดพลาดในการเปลี่ยนเครือข่าย: ' + switchError.message);
+                            }
+                            return;
+                        }
+                    } else {
+                        return;
+                    }
+                }
+            } catch (error) {
+                console.error('Error checking network:', error);
+            }
+            
+            // ตรวจสอบว่าเป็นแพลนถัดไปหรือไม่
+            try {
+                const response = await fetch(`/api/members/check-member?address=${userAddress}`);
+                const data = await response.json();
+                
+                if (data.planId + 1 !== parseInt(newPlanId)) {
+                    alert('คุณสามารถอัพเกรดได้เฉพาะแพลนถัดไปเท่านั้น');
+                    return;
+                }
+            } catch (error) {
+                console.error('Error checking member status:', error);
+            }
+            
+            // ยืนยันการอัพเกรดแพลน
+            if (confirm('คุณแน่ใจหรือไม่ที่จะอัพเกรดแพลนเป็นแพลน ' + newPlanId + '? การกระทำนี้จะโอน USDT จำนวน ' + priceDifference + ' ออกจากกระเป๋าของคุณ')) {
+                // ทุกอย่างผ่านการตรวจสอบแล้ว ส่งฟอร์ม
+                this.submit();
+            }
+        });
+    }
+});
+</script>
+
+<%- include('../partials/footer') %>

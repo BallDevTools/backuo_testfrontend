@@ -1,0 +1,218 @@
+<!-- views/admin/plans.ejs - หน้าจัดการแพลน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">จัดการแพลน</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>ชื่อแพลน</th>
+                        <th>ราคา</th>
+                        <th>สมาชิกต่อรอบ</th>
+                        <th>รอบปัจจุบัน</th>
+                        <th>สมาชิกในรอบ</th>
+                        <th>รูปภาพ</th>
+                        <th>สถานะ</th>
+                        <th>การจัดการ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (plans && plans.length > 0) { %>
+                        <% plans.forEach(plan => { %>
+                            <tr>
+                                <td><%= plan.id %></td>
+                                <td><%= plan.name %></td>
+                                <td><%= plan.price %> USDT</td>
+                                <td><%= plan.membersPerCycle %></td>
+                                <td><%= plan.currentCycle %></td>
+                                <td><%= plan.membersInCurrentCycle %> / <%= plan.membersPerCycle %></td>
+                                <td>
+                                    <% if (plan.imageUri) { %>
+                                        <a href="https://ipfs.io/ipfs/<%= plan.imageUri %>" target="_blank">
+                                            <img src="https://ipfs.io/ipfs/<%= plan.imageUri %>" alt="<%= plan.name %>" width="50" height="50">
+                                        </a>
+                                    <% } else { %>
+                                        <span class="badge badge-warning">ไม่มีรูปภาพ</span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <span class="badge badge-<%= plan.isActive ? 'success' : 'danger' %>">
+                                        <%= plan.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน' %>
+                                    </span>
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary toggle-plan-status" data-plan-id="<%= plan.id %>" data-is-active="<%= plan.isActive %>">
+                                        <%= plan.isActive ? 'ปิดการใช้งาน' : 'เปิดการใช้งาน' %>
+                                    </button>
+                                    <button class="btn btn-sm btn-info edit-plan-btn" data-plan-id="<%= plan.id %>" data-members-per-cycle="<%= plan.membersPerCycle %>" data-image-uri="<%= plan.imageUri %>">
+                                        แก้ไข
+                                    </button>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="9" class="text-center">ไม่พบข้อมูลแพลน</td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Modal แก้ไขแพลน -->
+<div class="modal" id="editPlanModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">แก้ไขแพลน</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" id="editPlanTabs" role="tablist">
+                    <li class="nav-item">
+                        <a class="nav-link active" id="image-tab" data-toggle="tab" href="#image-content" role="tab">รูปภาพ</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" id="members-tab" data-toggle="tab" href="#members-content" role="tab">จำนวนสมาชิกต่อรอบ</a>
+                    </li>
+                </ul>
+                <div class="tab-content mt-3" id="editPlanTabContent">
+                    <!-- แท็บรูปภาพ -->
+                    <div class="tab-pane fade show active" id="image-content" role="tabpanel">
+                        <form id="update-image-form" action="/admin/plans/update-image" method="POST">
+                            <input type="hidden" id="plan-id-image" name="planId">
+                            <div class="form-group">
+                                <label for="image-uri">URI รูปภาพ (IPFS Hash)</label>
+                                <input type="text" id="image-uri" name="imageURI" class="form-control" placeholder="bafybei...">
+                                <small class="form-text text-muted">ใส่ IPFS Hash โดยไม่ต้องมี ipfs:// หรือ https://ipfs.io/ipfs/ นำหน้า</small>
+                            </div>
+                            <div class="form-group">
+                                <label>ตัวอย่างรูปภาพปัจจุบัน</label>
+                                <div id="current-image-preview" class="text-center mt-2">
+                                    <img id="preview-image" src="" alt="ตัวอย่างรูปภาพ" style="max-width: 100%; max-height: 200px; display: none;">
+                                    <p id="no-image-text" class="text-muted">ไม่มีรูปภาพ</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                        </form>
+                    </div>
+                    
+                    <!-- แท็บจำนวนสมาชิกต่อรอบ -->
+                    <div class="tab-pane fade" id="members-content" role="tabpanel">
+                        <form id="update-members-form" action="/admin/plans/update-members-per-cycle" method="POST">
+                            <input type="hidden" id="plan-id-members" name="planId">
+                            <div class="form-group">
+                                <label for="members-per-cycle">จำนวนสมาชิกต่อรอบ</label>
+                                <input type="number" id="members-per-cycle" name="membersPerCycle" class="form-control" min="4" max="4" value="4" readonly>
+                                <small class="form-text text-muted">จำนวนสมาชิกต่อรอบต้องเป็น 4 เท่านั้น ตามข้อกำหนดของสัญญา</small>
+                            </div>
+                            <div class="form-group">
+                                <div class="alert alert-info">
+                                    <p>ในปัจจุบัน สัญญากำหนดให้จำนวนสมาชิกต่อรอบเป็น 4 เท่านั้น</p>
+                                    <p>คุณไม่สามารถเปลี่ยนแปลงค่านี้ได้ ยกเว้นในสัญญาจะมีการอัพเดทในอนาคต</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary" disabled>บันทึกการเปลี่ยนแปลง</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // จัดการการตั้งค่าแพลน
+        setupPlanManagement();
+    });
+    
+    // ฟังก์ชันจัดการการตั้งค่าแพลน
+    function setupPlanManagement() {
+        const togglePlanStatusBtns = document.querySelectorAll('.toggle-plan-status');
+        const editPlanBtns = document.querySelectorAll('.edit-plan-btn');
+        
+        togglePlanStatusBtns.forEach(btn => {
+            btn.addEventListener('click', async function() {
+                const planId = this.dataset.planId;
+                const isActive = this.dataset.isActive === 'true';
+                
+                // แสดงการยืนยันก่อนเปลี่ยนสถานะ
+                if (confirm(`คุณต้องการ${isActive ? 'ปิด' : 'เปิด'}การใช้งานแพลน ${planId} ใช่หรือไม่?`)) {
+                    try {
+                        const formData = new FormData();
+                        formData.append('planId', planId);
+                        formData.append('isActive', !isActive);
+                        
+                        const response = await fetch('/admin/plans/update-status', {
+                            method: 'POST',
+                            body: formData
+                        });
+                        
+                        if (response.ok) {
+                            window.location.reload();
+                        } else {
+                            alert('เกิดข้อผิดพลาดในการอัพเดทสถานะแพลน');
+                        }
+                    } catch (error) {
+                        console.error('Error updating plan status:', error);
+                        alert('เกิดข้อผิดพลาดในการอัพเดทสถานะแพลน');
+                    }
+                }
+            });
+        });
+        
+        editPlanBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                const planId = this.dataset.planId;
+                const membersPerCycle = this.dataset.membersPerCycle;
+                const imageUri = this.dataset.imageUri;
+                
+                // เตรียมข้อมูลสำหรับ modal
+                document.getElementById('plan-id-image').value = planId;
+                document.getElementById('plan-id-members').value = planId;
+                document.getElementById('members-per-cycle').value = membersPerCycle;
+                
+                if (imageUri) {
+                    document.getElementById('image-uri').value = imageUri;
+                    document.getElementById('preview-image').src = `https://ipfs.io/ipfs/${imageUri}`;
+                    document.getElementById('preview-image').style.display = 'block';
+                    document.getElementById('no-image-text').style.display = 'none';
+                } else {
+                    document.getElementById('image-uri').value = '';
+                    document.getElementById('preview-image').style.display = 'none';
+                    document.getElementById('no-image-text').style.display = 'block';
+                }
+                
+                // แสดง modal
+                $('#editPlanModal').modal('show');
+            });
+        });
+        
+        // แสดงตัวอย่างรูปภาพเมื่อมีการป้อน URI
+        document.getElementById('image-uri').addEventListener('input', function() {
+            const imageUri = this.value.trim();
+            
+            if (imageUri) {
+                document.getElementById('preview-image').src = `https://ipfs.io/ipfs/${imageUri}`;
+                document.getElementById('preview-image').style.display = 'block';
+                document.getElementById('no-image-text').style.display = 'none';
+            } else {
+                document.getElementById('preview-image').style.display = 'none';
+                document.getElementById('no-image-text').style.display = 'block';
+            }
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

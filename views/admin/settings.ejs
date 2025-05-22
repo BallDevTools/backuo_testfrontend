@@ -1,0 +1,141 @@
+<!-- views/admin/settings.ejs - หน้าตั้งค่าระบบ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">ตั้งค่าระบบ</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="system-status-section">
+                    <h3>สถานะระบบปัจจุบัน</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <ul class="system-status-list">
+                                <li>
+                                    <span class="status-label">สถานะสัญญา:</span>
+                                    <span class="status-value <%= contractStatus.isPaused ? 'text-danger' : 'text-success' %>">
+                                        <%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="status-label">จำนวนสมาชิก:</span>
+                                    <span class="status-value"><%= contractStatus.memberCount %> คน</span>
+                                </li>
+                                <li>
+                                    <span class="status-label">ยอดเงินในสัญญา:</span>
+                                    <span class="status-value"><%= contractStatus.totalBalance %> USDT</span>
+                                </li>
+                                <li>
+                                    <span class="status-label">คำขอถอนฉุกเฉิน:</span>
+                                    <span class="status-value <%= contractStatus.hasEmergencyRequest ? 'text-warning' : 'text-success' %>">
+                                        <%= contractStatus.hasEmergencyRequest ? 'มี' : 'ไม่มี' %>
+                                    </span>
+                                </li>
+                                <% if (contractStatus.hasEmergencyRequest) { %>
+                                    <li>
+                                        <span class="status-label">เวลาคงเหลือ:</span>
+                                        <span class="status-value text-warning">
+                                            <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง 
+                                            <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที
+                                        </span>
+                                    </li>
+                                <% } %>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contract-pause-section mt-4">
+                    <h3>การหยุดการทำงานของสัญญา</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>การหยุดการทำงานของสัญญาจะป้องกันไม่ให้มีการทำธุรกรรมใหม่ในระบบ</p>
+                            <div class="alert alert-<%= contractStatus.isPaused ? 'danger' : 'success' %>">
+                                <p>สถานะปัจจุบัน: <strong><%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %></strong></p>
+                            </div>
+                            <form id="set-paused-form" action="/admin/settings/set-paused" method="POST">
+                                <input type="hidden" name="isPaused" value="<%= !contractStatus.isPaused %>">
+                                <button type="submit" class="btn btn-<%= contractStatus.isPaused ? 'success' : 'warning' %> btn-block">
+                                    <i class="fas fa-<%= contractStatus.isPaused ? 'play' : 'pause' %>"></i> 
+                                    <%= contractStatus.isPaused ? 'เริ่มการทำงานสัญญา' : 'หยุดการทำงานสัญญา' %>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="base-uri-section">
+                    <h3>ตั้งค่า Base URI</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Base URI คือ URL พื้นฐานสำหรับ metadata ของ NFT</p>
+                            <form action="/admin/settings/set-base-uri" method="POST">
+                                <div class="form-group">
+                                    <label for="base-uri">Base URI</label>
+                                    <input type="text" id="base-uri" name="baseURI" class="form-control" placeholder="ipfs://" required>
+                                    <small class="form-text text-muted">เช่น ipfs:// หรือ https://example.com/metadata/</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="price-feed-section mt-4">
+                    <h3>ตั้งค่า Price Feed</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <p>Price Feed คือที่อยู่สัญญาสำหรับดึงข้อมูลราคา</p>
+                            <form action="/admin/settings/set-price-feed" method="POST">
+                                <div class="form-group">
+                                    <label for="price-feed">ที่อยู่ Price Feed</label>
+                                    <input type="text" id="price-feed" name="priceFeedAddress" class="form-control" placeholder="0x..." pattern="0x[a-fA-F0-9]{40}" required>
+                                    <small class="form-text text-muted">ที่อยู่ของสัญญา Price Feed</small>
+                                </div>
+                                <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="members-per-cycle-section mt-4">
+                    <h3>ตั้งค่าจำนวนสมาชิกต่อรอบ</h3>
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <p>ในปัจจุบัน สัญญากำหนดให้จำนวนสมาชิกต่อรอบเป็น 4 เท่านั้น</p>
+                                <p>คุณสามารถจัดการการตั้งค่านี้ได้ในหน้า <a href="/admin/plans">จัดการแพลน</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // จัดการการตั้งค่าระบบ
+        setupSystemSettings();
+    });
+    
+    // ฟังก์ชันจัดการการตั้งค่าระบบ
+    function setupSystemSettings() {
+        const setPausedForm = document.getElementById('set-paused-form');
+        if (setPausedForm) {
+            setPausedForm.addEventListener('submit', function(e) {
+                if (!confirm('คุณแน่ใจหรือไม่ที่จะเปลี่ยนสถานะการทำงานของสัญญา?')) {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+</script>
+
+<%- include('../partials/footer') %>

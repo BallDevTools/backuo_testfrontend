@@ -1,0 +1,433 @@
+<!-- views/admin/finance.ejs - หน้าจัดการการเงินสำหรับแอดมิน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">จัดการการเงิน</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <!-- ภาพรวมเงินทุน -->
+        <div class="finance-overview">
+            <h3>ภาพรวมการเงิน</h3>
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-header bg-primary">
+                            <i class="fas fa-money-bill-wave stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value"><%= systemStats.ownerFunds %> USDT</h4>
+                            <p class="stats-label">เงินเจ้าของ</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-header bg-success">
+                            <i class="fas fa-hand-holding-usd stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value"><%= systemStats.feeFunds %> USDT</h4>
+                            <p class="stats-label">เงินค่าธรรมเนียม</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stats-card">
+                        <div class="stats-header bg-warning">
+                            <i class="fas fa-piggy-bank stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value"><%= systemStats.fundFunds %> USDT</h4>
+                            <p class="stats-label">เงินกองทุน</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- การตรวจสอบความสมดุล -->
+        <div class="balance-validation mt-4">
+            <h3>การตรวจสอบความสมดุล</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h4>ยอดเงินที่คาดหวัง</h4>
+                            <p class="balance-value"><%= balanceValidation.expectedBalance %> USDT</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h4>ยอดเงินจริง</h4>
+                            <p class="balance-value"><%= balanceValidation.actualBalance %> USDT</p>
+                        </div>
+                    </div>
+                    <div class="balance-status mt-3">
+                        <% if (balanceValidation.isValid) { %>
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> ยอดเงินในสัญญาตรงกับที่คาดหวัง
+                            </div>
+                        <% } else { %>
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-circle"></i> พบข้อผิดพลาดในยอดเงิน มีความแตกต่าง <%= balanceValidation.actualBalance - balanceValidation.expectedBalance %> USDT
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ประวัติธุรกรรม -->
+        <div class="transaction-history mt-4">
+            <h3>ประวัติธุรกรรม</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="filters mb-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select id="transaction-type-filter" class="form-control">
+                                    <option value="">ทุกประเภท</option>
+                                    <option value="register">ลงทะเบียน</option>
+                                    <option value="upgrade">อัพเกรด</option>
+                                    <option value="exit">ออกจากการเป็นสมาชิก</option>
+                                    <option value="referral">ค่าแนะนำ</option>
+                                    <option value="withdraw">ถอนเงิน</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <input type="date" id="date-filter" class="form-control" placeholder="วันที่">
+                            </div>
+                            <div class="col-md-4">
+                                <button id="apply-filters" class="btn btn-primary btn-block">กรอง</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table" id="transactions-table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>ประเภท</th>
+                                    <th>ที่อยู่กระเป๋า</th>
+                                    <th>แพลน</th>
+                                    <th>จำนวนเงิน</th>
+                                    <th>สถานะ</th>
+                                    <th>ดูรายละเอียด</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-table-body">
+                                <tr>
+                                    <td colspan="7" class="text-center">กำลังโหลดข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="pagination-container mt-3 text-center">
+                        <button id="prev-page" class="btn btn-sm btn-secondary">ก่อนหน้า</button>
+                        <span id="page-info" class="mx-2">หน้า 1</span>
+                        <button id="next-page" class="btn btn-sm btn-secondary">ถัดไป</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal แสดงรายละเอียดธุรกรรม -->
+<div class="modal" id="transaction-details-modal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">รายละเอียดธุรกรรม</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" id="transaction-details-content">
+                <!-- รายละเอียดจะถูกเติมด้วย JavaScript -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ตัวแปรสำหรับการจัดการหน้า
+    let currentPage = 1;
+    let totalPages = 1;
+    let transactions = [];
+    let filters = {
+        type: '',
+        date: ''
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // โหลดข้อมูลธุรกรรมเมื่อหน้าโหลดเสร็จ
+        loadTransactions();
+
+        // เพิ่ม event listener สำหรับปุ่มกรอง
+        document.getElementById('apply-filters').addEventListener('click', function() {
+            filters.type = document.getElementById('transaction-type-filter').value;
+            filters.date = document.getElementById('date-filter').value;
+            currentPage = 1;
+            loadTransactions();
+        });
+
+        // เพิ่ม event listener สำหรับปุ่มเปลี่ยนหน้า
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadTransactions();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadTransactions();
+            }
+        });
+    });
+
+    // ฟังก์ชันโหลดข้อมูลธุรกรรม
+    async function loadTransactions() {
+        try {
+            const tableBody = document.getElementById('transactions-table-body');
+            tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">กำลังโหลด...</span></div></td></tr>';
+
+            // สร้าง query string จากตัวกรอง
+            let queryParams = `page=${currentPage}&limit=10`;
+            if (filters.type) {
+                queryParams += `&type=${filters.type}`;
+            }
+            if (filters.date) {
+                queryParams += `&date=${filters.date}`;
+            }
+
+            // ดึงข้อมูลธุรกรรม
+            const response = await fetch(`/api/transactions?${queryParams}`);
+            const data = await response.json();
+
+            transactions = data.transactions;
+            totalPages = data.totalPages || 1;
+
+            // อัพเดทข้อมูลหน้า
+            document.getElementById('page-info').textContent = `หน้า ${currentPage} จาก ${totalPages}`;
+
+            // แสดงข้อมูลในตาราง
+            if (transactions.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center">ไม่พบข้อมูลธุรกรรม</td></tr>';
+                return;
+            }
+
+            tableBody.innerHTML = '';
+            transactions.forEach(transaction => {
+                const row = document.createElement('tr');
+                
+                // กำหนดชื่อประเภทธุรกรรมเป็นภาษาไทย
+                let transactionType = '';
+                let badgeClass = '';
+                switch(transaction.transactionType) {
+                    case 'register':
+                        transactionType = 'ลงทะเบียน';
+                        badgeClass = 'badge-primary';
+                        break;
+                    case 'upgrade':
+                        transactionType = 'อัพเกรด';
+                        badgeClass = 'badge-success';
+                        break;
+                    case 'exit':
+                        transactionType = 'ออกจากการเป็นสมาชิก';
+                        badgeClass = 'badge-danger';
+                        break;
+                    case 'referral':
+                        transactionType = 'ค่าแนะนำ';
+                        badgeClass = 'badge-warning';
+                        break;
+                    case 'withdraw':
+                        transactionType = 'ถอนเงิน';
+                        badgeClass = 'badge-info';
+                        break;
+                    default:
+                        transactionType = transaction.transactionType;
+                        badgeClass = 'badge-secondary';
+                }
+
+                // กำหนดสถานะธุรกรรม
+                let statusBadge = '';
+                switch(transaction.status) {
+                    case 'pending':
+                        statusBadge = '<span class="badge badge-warning">รอดำเนินการ</span>';
+                        break;
+                    case 'completed':
+                        statusBadge = '<span class="badge badge-success">สำเร็จ</span>';
+                        break;
+                    case 'failed':
+                        statusBadge = '<span class="badge badge-danger">ล้มเหลว</span>';
+                        break;
+                    default:
+                        statusBadge = `<span class="badge badge-secondary">${transaction.status}</span>`;
+                }
+                
+                row.innerHTML = `
+                    <td>${new Date(transaction.createdAt).toLocaleString('th-TH')}</td>
+                    <td><span class="badge ${badgeClass}">${transactionType}</span></td>
+                    <td>${transaction.walletAddress.substring(0, 6)}...${transaction.walletAddress.substring(transaction.walletAddress.length - 4)}</td>
+                    <td>${transaction.planId || '-'}</td>
+                    <td>${transaction.amount || '-'} USDT</td>
+                    <td>${statusBadge}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info view-details-btn" data-id="${transaction.id}">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+
+            // เพิ่ม event listener สำหรับปุ่มดูรายละเอียด
+            document.querySelectorAll('.view-details-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const transactionId = this.getAttribute('data-id');
+                    showTransactionDetails(transactionId);
+                });
+            });
+        } catch (error) {
+            console.error('Error loading transactions:', error);
+            document.getElementById('transactions-table-body').innerHTML = '<tr><td colspan="7" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+        }
+    }
+
+    // ฟังก์ชันแสดงรายละเอียดธุรกรรม
+    function showTransactionDetails(transactionId) {
+        const transaction = transactions.find(t => t.id == transactionId);
+        if (!transaction) return;
+
+        const detailsContent = document.getElementById('transaction-details-content');
+        
+        let detailsHtml = `
+            <div class="transaction-detail-item">
+                <div class="detail-label">หมายเลขธุรกรรม:</div>
+                <div class="detail-value">${transaction.id}</div>
+            </div>
+            <div class="transaction-detail-item">
+                <div class="detail-label">วันที่:</div>
+                <div class="detail-value">${new Date(transaction.createdAt).toLocaleString('th-TH')}</div>
+            </div>
+            <div class="transaction-detail-item">
+                <div class="detail-label">ประเภท:</div>
+                <div class="detail-value">${transaction.transactionType}</div>
+            </div>
+            <div class="transaction-detail-item">
+                <div class="detail-label">ที่อยู่กระเป๋า:</div>
+                <div class="detail-value">${transaction.walletAddress}</div>
+            </div>
+        `;
+
+        if (transaction.planId) {
+            detailsHtml += `
+                <div class="transaction-detail-item">
+                    <div class="detail-label">แพลน:</div>
+                    <div class="detail-value">${transaction.planId}</div>
+                </div>
+            `;
+        }
+
+        if (transaction.amount) {
+            detailsHtml += `
+                <div class="transaction-detail-item">
+                    <div class="detail-label">จำนวนเงิน:</div>
+                    <div class="detail-value">${transaction.amount} USDT</div>
+                </div>
+            `;
+        }
+
+        detailsHtml += `
+            <div class="transaction-detail-item">
+                <div class="detail-label">สถานะ:</div>
+                <div class="detail-value">${transaction.status}</div>
+            </div>
+        `;
+
+        if (transaction.txHash) {
+            detailsHtml += `
+                <div class="transaction-detail-item">
+                    <div class="detail-label">Hash ธุรกรรม:</div>
+                    <div class="detail-value">
+                        <a href="https://bscscan.com/tx/${transaction.txHash}" target="_blank">
+                            ${transaction.txHash}
+                        </a>
+                    </div>
+                </div>
+            `;
+        }
+
+        detailsContent.innerHTML = detailsHtml;
+        $('#transaction-details-modal').modal('show');
+    }
+</script>
+
+<style>
+    .stats-card {
+        background-color: #fff;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 1.5rem;
+    }
+    
+    .stats-header {
+        padding: 1.5rem;
+        text-align: center;
+        color: white;
+    }
+    
+    .stats-icon {
+        font-size: 2rem;
+    }
+    
+    .stats-body {
+        padding: 1.5rem;
+        text-align: center;
+    }
+    
+    .stats-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stats-label {
+        color: #6c757d;
+    }
+    
+    .balance-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+    }
+    
+    .transaction-detail-item {
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #eee;
+        display: flex;
+    }
+    
+    .transaction-detail-item:last-child {
+        border-bottom: none;
+    }
+    
+    .detail-label {
+        font-weight: bold;
+        width: 150px;
+    }
+    
+    .detail-value {
+        flex: 1;
+    }
+</style>
+
+<%- include('../partials/footer') %>

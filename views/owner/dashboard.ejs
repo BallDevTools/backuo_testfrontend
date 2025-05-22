@@ -1,0 +1,323 @@
+<!-- views/owner/dashboard.ejs - หน้าแดชบอร์ดสำหรับเจ้าของระบบ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon primary">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.totalMembers %></div>
+            <div class="dashboard-stat-label">จำนวนสมาชิกทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon success">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.totalRevenue %> USDT</div>
+            <div class="dashboard-stat-label">รายได้ทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon warning">
+            <i class="fas fa-hand-holding-usd"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= systemStats.ownerFunds %> USDT</div>
+            <div class="dashboard-stat-label">เงินเจ้าของ</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon <%= contractStatus.isPaused ? 'danger' : 'success' %>">
+            <i class="fas fa-<%= contractStatus.isPaused ? 'pause' : 'play' %>"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %></div>
+            <div class="dashboard-stat-label">สถานะสัญญา</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ภาพรวมการเงิน</h2>
+                <div class="dashboard-card-actions">
+                    <a href="/owner/withdrawals" class="btn btn-primary btn-sm">จัดการการถอนเงิน</a>
+                </div>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="financial-overview">
+                    <div class="financial-chart-container">
+                        <canvas id="financialChart" width="400" height="200"></canvas>
+                    </div>
+                    <div class="financial-details mt-3">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินเจ้าของ</h4>
+                                    <div class="financial-value"><%= systemStats.ownerFunds %> USDT</div>
+                                    <a href="/owner/withdrawals?type=0" class="btn btn-sm btn-primary mt-2">ถอนเงิน</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินค่าธรรมเนียม</h4>
+                                    <div class="financial-value"><%= systemStats.feeFunds %> USDT</div>
+                                    <a href="/owner/withdrawals?type=1" class="btn btn-sm btn-primary mt-2">ถอนเงิน</a>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="financial-item">
+                                    <h4>เงินกองทุน</h4>
+                                    <div class="financial-value"><%= systemStats.fundFunds %> USDT</div>
+                                    <a href="/owner/withdrawals?type=2" class="btn btn-sm btn-primary mt-2">ถอนเงิน</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">สถานะแพลน</h2>
+                <div class="dashboard-card-actions">
+                    <a href="/admin/plans" class="btn btn-primary btn-sm">จัดการแพลน</a>
+                </div>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="table-responsive">
+                    <table class="dashboard-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อแพลน</th>
+                                <th>ราคา</th>
+                                <th>สมาชิกต่อรอบ</th>
+                                <th>รอบปัจจุบัน</th>
+                                <th>สมาชิกในรอบ</th>
+                                <th>สถานะ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="plans-table-body">
+                            <!-- ข้อมูลแพลนจะถูกโหลดด้วย JavaScript -->
+                            <tr>
+                                <td colspan="7" class="text-center">กำลังโหลดข้อมูล...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">สถานะระบบ</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <ul class="system-status-list">
+                    <li>
+                        <span class="status-label">สถานะสัญญา:</span>
+                        <span class="status-value <%= contractStatus.isPaused ? 'text-danger' : 'text-success' %>">
+                            <%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %>
+                        </span>
+                    </li>
+                    <li>
+                        <span class="status-label">จำนวนสมาชิก:</span>
+                        <span class="status-value"><%= contractStatus.memberCount %> คน</span>
+                    </li>
+                    <li>
+                        <span class="status-label">จำนวนแพลน:</span>
+                        <span class="status-value"><%= contractStatus.currentPlanCount %> แพลน</span>
+                    </li>
+                    <li>
+                        <span class="status-label">ยอดเงินในสัญญา:</span>
+                        <span class="status-value"><%= contractStatus.totalBalance %> USDT</span>
+                    </li>
+                    <li>
+                        <span class="status-label">คำขอถอนฉุกเฉิน:</span>
+                        <span class="status-value <%= contractStatus.hasEmergencyRequest ? 'text-warning' : 'text-success' %>">
+                            <%= contractStatus.hasEmergencyRequest ? 'มี' : 'ไม่มี' %>
+                        </span>
+                    </li>
+                    <% if (contractStatus.hasEmergencyRequest) { %>
+                    <li>
+                        <span class="status-label">เวลาคงเหลือ:</span>
+                        <span class="status-value text-warning">
+                            <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง 
+                            <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที
+                        </span>
+                    </li>
+                    <% } %>
+                </ul>
+                
+                <div class="system-actions mt-3">
+                    <form action="/admin/settings/set-paused" method="POST" class="mb-2">
+                        <input type="hidden" name="isPaused" value="<%= !contractStatus.isPaused %>">
+                        <button type="submit" class="btn btn-<%= contractStatus.isPaused ? 'success' : 'warning' %> btn-block">
+                            <i class="fas fa-<%= contractStatus.isPaused ? 'play' : 'pause' %>"></i> 
+                            <%= contractStatus.isPaused ? 'เริ่มการทำงานสัญญา' : 'หยุดการทำงานสัญญา' %>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ฟังก์ชันฉุกเฉิน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <p class="emergency-info">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    ฟังก์ชันฉุกเฉินใช้สำหรับกรณีที่เกิดปัญหาร้ายแรงกับระบบ
+                </p>
+                
+                <% if (contractStatus.hasEmergencyRequest) { %>
+                    <div class="alert alert-warning">
+                        <p>มีคำขอถอนเงินฉุกเฉินที่รอดำเนินการ</p>
+                        <p>เวลาคงเหลือ: <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง 
+                        <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที</p>
+                    </div>
+                    
+                    <% if (contractStatus.emergencyTimeRemaining <= 0) { %>
+                        <form action="/owner/emergency/withdraw" method="POST">
+                            <button type="submit" class="btn btn-danger btn-block mb-2">
+                                <i class="fas fa-exclamation-circle"></i> ดำเนินการถอนเงินฉุกเฉิน
+                            </button>
+                        </form>
+                    <% } %>
+                    
+                    <form action="/owner/emergency/cancel" method="POST">
+                        <button type="submit" class="btn btn-secondary btn-block">
+                            <i class="fas fa-times"></i> ยกเลิกคำขอถอนเงินฉุกเฉิน
+                        </button>
+                    </form>
+                <% } else { %>
+                    <form action="/owner/emergency/request" method="POST">
+                        <button type="submit" class="btn btn-danger btn-block">
+                            <i class="fas fa-exclamation-circle"></i> ขอถอนเงินฉุกเฉิน
+                        </button>
+                    </form>
+                    <small class="text-muted mt-2">
+                        หมายเหตุ: การขอถอนเงินฉุกเฉินต้องรอระยะเวลา 2 วัน จึงจะดำเนินการได้
+                    </small>
+                <% } %>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ทางลัด</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="shortcut-buttons">
+                    <a href="/admin/members" class="btn btn-primary btn-block mb-2">
+                        <i class="fas fa-users"></i> จัดการสมาชิก
+                    </a>
+                    <a href="/owner/withdrawals" class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-hand-holding-usd"></i> จัดการการถอนเงิน
+                    </a>
+                    <a href="/admin/plans" class="btn btn-info btn-block mb-2">
+                        <i class="fas fa-layer-group"></i> จัดการแพลน
+                    </a>
+                    <a href="/admin/settings" class="btn btn-secondary btn-block">
+                        <i class="fas fa-cog"></i> ตั้งค่าระบบ
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // โหลดข้อมูลแพลน
+        loadPlans();
+        
+        // สร้างกราฟภาพรวมการเงิน
+        createFinancialChart();
+    });
+    
+    // ฟังก์ชันโหลดข้อมูลแพลน
+    async function loadPlans() {
+        try {
+            // สมมติให้มีเอนด์พอยท์ API สำหรับดึงข้อมูลแพลน
+            const response = await fetch('/api/plans');
+            const plans = await response.json();
+            
+            const tableBody = document.getElementById('plans-table-body');
+            tableBody.innerHTML = '';
+            
+            plans.forEach(plan => {
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${plan.id}</td>
+                    <td>${plan.name}</td>
+                    <td>${plan.price} USDT</td>
+                    <td>${plan.membersPerCycle}</td>
+                    <td>${plan.currentCycle}</td>
+                    <td>${plan.membersInCurrentCycle} / ${plan.membersPerCycle}</td>
+                    <td>
+                        <span class="badge badge-${plan.isActive ? 'success' : 'danger'}">
+                            ${plan.isActive ? 'เปิดใช้งาน' : 'ปิดใช้งาน'}
+                        </span>
+                    </td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        } catch (error) {
+            console.error('Error loading plans:', error);
+            document.getElementById('plans-table-body').innerHTML = `
+                <tr>
+                    <td colspan="7" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td>
+                </tr>
+            `;
+        }
+    }
+    
+    // ฟังก์ชันสร้างกราฟภาพรวมการเงิน
+    function createFinancialChart() {
+        const ctx = document.getElementById('financialChart').getContext('2d');
+        
+        const financialChart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['เงินเจ้าของ', 'เงินค่าธรรมเนียม', 'เงินกองทุน', 'ค่าคอมมิชชั่น'],
+                datasets: [{
+                    data: [
+                        <%= systemStats.ownerFunds %>,
+                        <%= systemStats.feeFunds %>,
+                        <%= systemStats.fundFunds %>,
+                        <%= systemStats.totalCommission %>
+                    ],
+                    backgroundColor: [
+                        '#3498db',
+                        '#2ecc71',
+                        '#f39c12',
+                        '#e74c3c'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+    }
+</script>
+
+<%- include('../partials/footer') %>

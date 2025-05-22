@@ -1,0 +1,232 @@
+<!-- views/user/dashboard.ejs - หน้าแดชบอร์ดสำหรับผู้ใช้ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon primary">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value">แพลน <%= currentPlan.name %></div>
+            <div class="dashboard-stat-label">แพลนปัจจุบันของคุณ</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon success">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= memberInfo.totalReferrals %></div>
+            <div class="dashboard-stat-label">การแนะนำทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon warning">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= memberInfo.totalEarnings %> USDT</div>
+            <div class="dashboard-stat-label">รายได้จากการแนะนำ</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon danger">
+            <i class="fas fa-clock"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value">
+                <% 
+                    const daysPassed = Math.floor((Date.now() - memberInfo.registeredAt) / (1000 * 60 * 60 * 24));
+                    if (daysPassed >= 30) { 
+                %>
+                    พร้อมถอนได้แล้ว
+                <% } else { %>
+                    <%= 30 - daysPassed %> วัน
+                <% } %>
+            </div>
+            <div class="dashboard-stat-label">เวลาคงเหลือในการล็อค</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">NFT สมาชิกของคุณ</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="nft-card">
+                    <% if (tokenMetadata && tokenMetadata.imageURI) { %>
+                        <img src="https://ipfs.io/ipfs/<%= tokenMetadata.imageURI %>" alt="Membership NFT" class="nft-image">
+                    <% } else { %>
+                        <img src="https://ipfs.io/ipfs/<%= currentPlan.imageUri || 'bafybeignaodj5a2bmtt6ccz3mmf7dx5iseib3orllgf4ed4tdnfijnxfrq' %>" alt="Membership NFT" class="nft-image">
+                    <% } %>
+                    <div class="nft-details">
+                        <h3 class="nft-title">
+                            <% if (tokenMetadata && tokenMetadata.name) { %>
+                                <%= tokenMetadata.name %>
+                            <% } else { %>
+                                Crypto Membership - แพลน <%= currentPlan.name %>
+                            <% } %>
+                        </h3>
+                        <p class="nft-description">
+                            <% if (tokenMetadata && tokenMetadata.description) { %>
+                                <%= tokenMetadata.description %>
+                            <% } else { %>
+                                NFT สมาชิกที่ไม่สามารถโอนได้ แพลนปัจจุบัน: <%= currentPlan.name %>
+                            <% } %>
+                        </p>
+                        <div class="nft-info">
+                            <span>รอบที่: <%= memberInfo.cycleNumber %></span>
+                            <span>วันที่ลงทะเบียน: <%= memberInfo.registeredAt.toLocaleDateString('th-TH') %></span>
+                            <% if (tokenMetadata && tokenMetadata.tokenId) { %>
+                                <span>Token ID: <%= tokenMetadata.tokenId %></span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <% if (nextPlan) { %>
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">อัพเกรดแพลน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="current-plan">
+                            <h3>แพลนปัจจุบัน</h3>
+                            <div class="plan-card">
+                                <div class="plan-header">
+                                    <h3>แพลน <%= currentPlan.name %></h3>
+                                    <div class="plan-price"><%= currentPlan.price %> USDT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="next-plan">
+                            <h3>แพลนถัดไป</h3>
+                            <div class="plan-card">
+                                <div class="plan-header">
+                                    <h3>แพลน <%= nextPlan.name %></h3>
+                                    <div class="plan-price"><%= nextPlan.price %> USDT</div>
+                                </div>
+                                <div class="plan-footer">
+                                    <a href="/user/upgrade" class="btn btn-primary btn-block">อัพเกรดเลย</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">รายละเอียดแพลน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <ul class="plan-details-list">
+                    <li>
+                        <span class="plan-detail-label">แพลนปัจจุบัน:</span>
+                        <span class="plan-detail-value">แพลน <%= currentPlan.name %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">ราคาแพลน:</span>
+                        <span class="plan-detail-value"><%= currentPlan.price %> USDT</span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">รอบปัจจุบัน:</span>
+                        <span class="plan-detail-value"><%= memberInfo.cycleNumber %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">สมาชิกต่อรอบ:</span>
+                        <span class="plan-detail-value"><%= currentPlan.membersPerCycle %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">สมาชิกในรอบนี้:</span>
+                        <span class="plan-detail-value"><%= currentPlan.membersInCurrentCycle %> / <%= currentPlan.membersPerCycle %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">วันที่สมัคร:</span>
+                        <span class="plan-detail-value"><%= memberInfo.registeredAt.toLocaleDateString('th-TH') %></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ลิงก์แนะนำ</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="referral-link-box">
+                    <label for="referral-link">ลิงก์แนะนำของคุณ:</label>
+                    <div class="input-group mb-3">
+                        <input type="text" id="referral-link" class="form-control" value="<%= referralLink %>" readonly>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" onclick="window.app.copyReferralLink()">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <p class="referral-info">
+                        แชร์ลิงก์นี้กับเพื่อนของคุณและรับค่าคอมมิชชั่นทันทีเมื่อพวกเขาสมัครผ่านลิงก์ของคุณ
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <% if (daysPassed >= 30) { %>
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">ออกจากการเป็นสมาชิก</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <p>คุณสามารถออกจากการเป็นสมาชิกและรับเงินคืน 30% ของราคาแพลนได้</p>
+                <button type="button" class="btn btn-danger btn-block" data-toggle="modal" data-target="#exitMembershipModal">
+                    ออกจากการเป็นสมาชิก
+                </button>
+            </div>
+        </div>
+        <% } %>
+    </div>
+</div>
+
+<!-- Modal ยืนยันการออกจากการเป็นสมาชิก -->
+<div class="modal" id="exitMembershipModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">ยืนยันการออกจากการเป็นสมาชิก</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>คุณแน่ใจหรือไม่ที่จะออกจากการเป็นสมาชิก?</p>
+                <p>คุณจะได้รับเงินคืน 30% ของราคาแพลนคือ <strong><%= currentPlan.price * 0.3 %> USDT</strong></p>
+                <p class="text-danger">หมายเหตุ: การกระทำนี้ไม่สามารถยกเลิกได้ และคุณจะสูญเสีย NFT สมาชิกของคุณ</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ยกเลิก</button>
+                <form action="/user/exit-membership" method="POST">
+                    <button type="submit" class="btn btn-danger">ยืนยันการออกจากการเป็นสมาชิก</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

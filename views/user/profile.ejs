@@ -1,0 +1,97 @@
+<!-- views/user/profile.ejs - หน้าโปรไฟล์ผู้ใช้ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">โปรไฟล์ผู้ใช้</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="profile-image">
+                    <div class="user-avatar">
+                        <i class="fas fa-user fa-5x"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="profile-details">
+                    <div class="profile-item">
+                        <div class="profile-item-label">ชื่อผู้ใช้:</div>
+                        <div class="profile-item-value"><%= user.username %></div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">ที่อยู่กระเป๋า:</div>
+                        <div class="profile-item-value"><%= walletAddress %></div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">แพลนปัจจุบัน:</div>
+                        <div class="profile-item-value">แพลน <%= currentPlan.name %></div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">รอบปัจจุบัน:</div>
+                        <div class="profile-item-value"><%= memberInfo.cycleNumber %></div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">วันที่ลงทะเบียน:</div>
+                        <div class="profile-item-value"><%= memberInfo.registeredAt.toLocaleDateString('th-TH') %></div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">จำนวนการแนะนำ:</div>
+                        <div class="profile-item-value"><%= memberInfo.totalReferrals %> คน</div>
+                    </div>
+                    <div class="profile-item">
+                        <div class="profile-item-label">รายได้ทั้งหมด:</div>
+                        <div class="profile-item-value"><%= memberInfo.totalEarnings %> USDT</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card mt-4">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">ผู้แนะนำ</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="upline-info">
+            <% if (memberInfo.upline && memberInfo.upline !== '0x0000000000000000000000000000000000000000') { %>
+                <p>ผู้แนะนำของคุณ: <%= memberInfo.upline.substring(0, 6) %>...
+                <%= memberInfo.upline.substring(memberInfo.upline.length - 4) %></p>
+            <% } else { %>
+                <p>คุณไม่มีผู้แนะนำ</p>
+            <% } %>
+        </div>
+    </div>
+</div>
+
+<div class="dashboard-card mt-4">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">การตั้งค่าบัญชี</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <form action="/user/update-profile" method="POST">
+            <div class="form-group">
+                <label for="username">ชื่อผู้ใช้</label>
+                <input type="text" id="username" name="username" class="form-control" value="<%= user.username %>" disabled>
+                <small class="form-text text-muted">ไม่สามารถเปลี่ยนชื่อผู้ใช้ได้</small>
+            </div>
+            <div class="form-group">
+                <label for="password">รหัสผ่านใหม่</label>
+                <input type="password" id="password" name="password" class="form-control">
+                <small class="form-text text-muted">ปล่อยว่างไว้หากไม่ต้องการเปลี่ยนรหัสผ่าน</small>
+            </div>
+            <div class="form-group">
+                <label for="password2">ยืนยันรหัสผ่านใหม่</label>
+                <input type="password" id="password2" name="password2" class="form-control">
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">บันทึกการเปลี่ยนแปลง</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<%- include('../partials/footer') %>

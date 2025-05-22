@@ -1,0 +1,563 @@
+<!-- views/admin/members.ejs - หน้าจัดการสมาชิก -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">จัดการสมาชิก</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <!-- ภาพรวมสมาชิก -->
+        <div class="member-overview">
+            <div class="row">
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-header bg-primary">
+                            <i class="fas fa-users stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value" id="total-members">0</h4>
+                            <p class="stats-label">สมาชิกทั้งหมด</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-header bg-success">
+                            <i class="fas fa-user-plus stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value" id="new-members-today">0</h4>
+                            <p class="stats-label">สมาชิกใหม่วันนี้</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-header bg-warning">
+                            <i class="fas fa-arrow-up stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value" id="upgrades-today">0</h4>
+                            <p class="stats-label">อัพเกรดวันนี้</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stats-card">
+                        <div class="stats-header bg-danger">
+                            <i class="fas fa-user-minus stats-icon"></i>
+                        </div>
+                        <div class="stats-body">
+                            <h4 class="stats-value" id="exits-today">0</h4>
+                            <p class="stats-label">ออกจากสมาชิกวันนี้</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- การค้นหาและกรองสมาชิก -->
+        <div class="member-search mt-4">
+            <div class="card">
+                <div class="card-body">
+                    <h3>ค้นหาสมาชิก</h3>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label for="search-wallet">ที่อยู่กระเป๋า</label>
+                                <input type="text" id="search-wallet" class="form-control" placeholder="0x...">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="filter-plan">แพลน</label>
+                                <select id="filter-plan" class="form-control">
+                                    <option value="">ทั้งหมด</option>
+                                    <option value="1">แพลน 1</option>
+                                    <option value="2">แพลน 2</option>
+                                    <option value="3">แพลน 3</option>
+                                    <option value="4">แพลน 4</option>
+                                    <option value="5">แพลน 5 ขึ้นไป</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label for="sort-by">เรียงตาม</label>
+                                <select id="sort-by" class="form-control">
+                                    <option value="registeredAt_desc">ลงทะเบียนล่าสุด</option>
+                                    <option value="registeredAt_asc">ลงทะเบียนเก่าสุด</option>
+                                    <option value="planId_desc">แพลนสูงสุด</option>
+                                    <option value="planId_asc">แพลนต่ำสุด</option>
+                                    <option value="totalReferrals_desc">จำนวนแนะนำมากสุด</option>
+                                    <option value="totalEarnings_desc">รายได้มากสุด</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>&nbsp;</label>
+                                <button id="search-btn" class="btn btn-primary btn-block">ค้นหา</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- รายการสมาชิก -->
+        <div class="member-list mt-4">
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>ที่อยู่กระเป๋า</th>
+                            <th>แพลน</th>
+                            <th>รอบ</th>
+                            <th>วันที่ลงทะเบียน</th>
+                            <th>จำนวนแนะนำ</th>
+                            <th>รายได้</th>
+                            <th>รายละเอียด</th>
+                        </tr>
+                    </thead>
+                    <tbody id="members-table-body">
+                        <tr>
+                            <td colspan="7" class="text-center">กำลังโหลดข้อมูล...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container mt-3 text-center">
+                <button id="prev-page" class="btn btn-sm btn-secondary">ก่อนหน้า</button>
+                <span id="page-info" class="mx-2">หน้า 1</span>
+                <button id="next-page" class="btn btn-sm btn-secondary">ถัดไป</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal แสดงรายละเอียดสมาชิก -->
+<div class="modal" id="member-details-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">รายละเอียดสมาชิก</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row" id="member-details-content">
+                    <!-- รายละเอียดจะถูกเติมด้วย JavaScript -->
+                </div>
+                
+                <div class="member-transactions mt-4">
+                    <h3>ประวัติธุรกรรม</h3>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>ประเภท</th>
+                                    <th>รายละเอียด</th>
+                                    <th>จำนวนเงิน</th>
+                                    <th>สถานะ</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-transactions-body">
+                                <tr>
+                                    <td colspan="5" class="text-center">กำลังโหลดข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="member-referrals mt-4">
+                    <h3>การแนะนำ</h3>
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>วันที่</th>
+                                    <th>ที่อยู่กระเป๋าผู้ถูกแนะนำ</th>
+                                    <th>แพลน</th>
+                                    <th>ค่าคอมมิชชั่น</th>
+                                </tr>
+                            </thead>
+                            <tbody id="member-referrals-body">
+                                <tr>
+                                    <td colspan="4" class="text-center">กำลังโหลดข้อมูล...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">ปิด</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ตัวแปรสำหรับการจัดการหน้า
+    let currentPage = 1;
+    let totalPages = 1;
+    let members = [];
+    let filters = {
+        wallet: '',
+        plan: '',
+        sortBy: 'registeredAt_desc'
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // โหลดข้อมูลภาพรวม
+        loadMemberStats();
+        
+        // โหลดข้อมูลสมาชิก
+        loadMembers();
+
+        // เพิ่ม event listener สำหรับปุ่มค้นหา
+        document.getElementById('search-btn').addEventListener('click', function() {
+            filters.wallet = document.getElementById('search-wallet').value;
+            filters.plan = document.getElementById('filter-plan').value;
+            filters.sortBy = document.getElementById('sort-by').value;
+            currentPage = 1;
+            loadMembers();
+        });
+
+        // เพิ่ม event listener สำหรับปุ่มเปลี่ยนหน้า
+        document.getElementById('prev-page').addEventListener('click', function() {
+            if (currentPage > 1) {
+                currentPage--;
+                loadMembers();
+            }
+        });
+
+        document.getElementById('next-page').addEventListener('click', function() {
+            if (currentPage < totalPages) {
+                currentPage++;
+                loadMembers();
+            }
+        });
+    });
+
+    // ฟังก์ชันโหลดสถิติสมาชิก
+    async function loadMemberStats() {
+        try {
+            const response = await fetch('/api/member-stats');
+            const stats = await response.json();
+            
+            document.getElementById('total-members').textContent = stats.totalMembers || 0;
+            document.getElementById('new-members-today').textContent = stats.newMembersToday || 0;
+            document.getElementById('upgrades-today').textContent = stats.upgradesToday || 0;
+           document.getElementById('exits-today').textContent = stats.exitsToday || 0;
+       } catch (error) {
+           console.error('Error loading member stats:', error);
+       }
+   }
+
+   // ฟังก์ชันโหลดข้อมูลสมาชิก
+   async function loadMembers() {
+       try {
+           const tableBody = document.getElementById('members-table-body');
+           tableBody.innerHTML = '<tr><td colspan="7" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">กำลังโหลด...</span></div></td></tr>';
+
+           // สร้าง query string จากตัวกรอง
+           let queryParams = `page=${currentPage}&limit=10`;
+           if (filters.wallet) {
+               queryParams += `&wallet=${filters.wallet}`;
+           }
+           if (filters.plan) {
+               queryParams += `&plan=${filters.plan}`;
+           }
+           if (filters.sortBy) {
+               queryParams += `&sortBy=${filters.sortBy}`;
+           }
+
+           // ดึงข้อมูลสมาชิก
+           const response = await fetch(`/api/members?${queryParams}`);
+           const data = await response.json();
+
+           members = data.members;
+           totalPages = data.totalPages || 1;
+
+           // อัพเดทข้อมูลหน้า
+           document.getElementById('page-info').textContent = `หน้า ${currentPage} จาก ${totalPages}`;
+
+           // แสดงข้อมูลในตาราง
+           if (members.length === 0) {
+               tableBody.innerHTML = '<tr><td colspan="7" class="text-center">ไม่พบข้อมูลสมาชิก</td></tr>';
+               return;
+           }
+
+           tableBody.innerHTML = '';
+           members.forEach(member => {
+               const row = document.createElement('tr');
+               
+               row.innerHTML = `
+                   <td>${member.walletAddress.substring(0, 6)}...${member.walletAddress.substring(member.walletAddress.length - 4)}</td>
+                   <td>แพลน ${member.planId}</td>
+                   <td>รอบที่ ${member.cycleNumber}</td>
+                   <td>${new Date(member.registeredAt).toLocaleDateString('th-TH')}</td>
+                   <td>${member.totalReferrals}</td>
+                   <td>${member.totalEarnings} USDT</td>
+                   <td>
+                       <button class="btn btn-sm btn-info view-member-btn" data-wallet="${member.walletAddress}">
+                           <i class="fas fa-search"></i>
+                       </button>
+                   </td>
+               `;
+               
+               tableBody.appendChild(row);
+           });
+
+           // เพิ่ม event listener สำหรับปุ่มดูรายละเอียด
+           document.querySelectorAll('.view-member-btn').forEach(btn => {
+               btn.addEventListener('click', function() {
+                   const walletAddress = this.getAttribute('data-wallet');
+                   showMemberDetails(walletAddress);
+               });
+           });
+       } catch (error) {
+           console.error('Error loading members:', error);
+           document.getElementById('members-table-body').innerHTML = '<tr><td colspan="7" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+       }
+   }
+
+   // ฟังก์ชันแสดงรายละเอียดสมาชิก
+   async function showMemberDetails(walletAddress) {
+       try {
+           // แสดง modal ก่อนเพื่อให้ผู้ใช้เห็นว่ากำลังโหลดข้อมูล
+           $('#member-details-modal').modal('show');
+           
+           const detailsContent = document.getElementById('member-details-content');
+           const transactionsBody = document.getElementById('member-transactions-body');
+           const referralsBody = document.getElementById('member-referrals-body');
+           
+           detailsContent.innerHTML = '<div class="col-12 text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">กำลังโหลด...</span></div></div>';
+           transactionsBody.innerHTML = '<tr><td colspan="5" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">กำลังโหลด...</span></div></td></tr>';
+           referralsBody.innerHTML = '<tr><td colspan="4" class="text-center"><div class="spinner-border text-primary" role="status"><span class="sr-only">กำลังโหลด...</span></div></td></tr>';
+           
+           // ดึงข้อมูลรายละเอียดสมาชิก
+           const memberResponse = await fetch(`/api/members/${walletAddress}`);
+           const memberData = await memberResponse.json();
+           
+           if (!memberData) {
+               detailsContent.innerHTML = '<div class="col-12 text-center text-danger">ไม่พบข้อมูลสมาชิก</div>';
+               return;
+           }
+
+           // ดึงข้อมูล NFT ของสมาชิก
+           const nftResponse = await fetch(`/api/members/${walletAddress}/nft`);
+           const nftData = await nftResponse.json();
+           
+           // แสดงข้อมูลสมาชิก
+           detailsContent.innerHTML = `
+               <div class="col-md-4">
+                   <div class="member-nft-image">
+                       ${nftData.imageURI ? 
+                           `<img src="https://ipfs.io/ipfs/${nftData.imageURI}" alt="NFT" class="img-fluid">` : 
+                           '<div class="no-nft">ไม่มีข้อมูล NFT</div>'}
+                   </div>
+               </div>
+               <div class="col-md-8">
+                   <div class="member-info">
+                       <div class="member-detail-item">
+                           <div class="detail-label">ที่อยู่กระเป๋า:</div>
+                           <div class="detail-value">${memberData.walletAddress}</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">แพลนปัจจุบัน:</div>
+                           <div class="detail-value">แพลน ${memberData.planId}</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">รอบปัจจุบัน:</div>
+                           <div class="detail-value">รอบที่ ${memberData.cycleNumber}</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">วันที่ลงทะเบียน:</div>
+                           <div class="detail-value">${new Date(memberData.registeredAt).toLocaleDateString('th-TH')}</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">ผู้แนะนำ:</div>
+                           <div class="detail-value">
+                               ${memberData.upline && memberData.upline !== '0x0000000000000000000000000000000000000000' ? 
+                               `${memberData.upline.substring(0, 6)}...${memberData.upline.substring(memberData.upline.length - 4)}` : 
+                               'ไม่มีผู้แนะนำ'}
+                           </div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">จำนวนการแนะนำ:</div>
+                           <div class="detail-value">${memberData.totalReferrals}</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">รายได้ทั้งหมด:</div>
+                           <div class="detail-value">${memberData.totalEarnings} USDT</div>
+                       </div>
+                       <div class="member-detail-item">
+                           <div class="detail-label">Token ID:</div>
+                           <div class="detail-value">${nftData.tokenId || 'N/A'}</div>
+                       </div>
+                   </div>
+               </div>
+           `;
+           
+           // ดึงประวัติธุรกรรมของสมาชิก
+           const txResponse = await fetch(`/api/members/${walletAddress}/transactions`);
+           const txData = await txResponse.json();
+           
+           if (txData.length === 0) {
+               transactionsBody.innerHTML = '<tr><td colspan="5" class="text-center">ไม่พบประวัติธุรกรรม</td></tr>';
+           } else {
+               transactionsBody.innerHTML = '';
+               txData.forEach(tx => {
+                   const row = document.createElement('tr');
+                   
+                   // กำหนดชื่อประเภทธุรกรรมเป็นภาษาไทย
+                   let transactionType = '';
+                   let badgeClass = '';
+                   switch(tx.transactionType) {
+                       case 'register':
+                           transactionType = 'ลงทะเบียน';
+                           badgeClass = 'badge-primary';
+                           break;
+                       case 'upgrade':
+                           transactionType = 'อัพเกรด';
+                           badgeClass = 'badge-success';
+                           break;
+                       case 'exit':
+                           transactionType = 'ออกจากการเป็นสมาชิก';
+                           badgeClass = 'badge-danger';
+                           break;
+                       case 'referral':
+                           transactionType = 'ค่าแนะนำ';
+                           badgeClass = 'badge-warning';
+                           break;
+                       default:
+                           transactionType = tx.transactionType;
+                           badgeClass = 'badge-secondary';
+                   }
+                   
+                   let details = '';
+                   if (tx.transactionType === 'register') {
+                       details = `สมัครสมาชิกแพลน ${tx.planId}`;
+                   } else if (tx.transactionType === 'upgrade') {
+                       details = `อัพเกรดจากแพลน ${tx.oldPlanId} เป็นแพลน ${tx.planId}`;
+                   } else if (tx.transactionType === 'exit') {
+                       details = 'ออกจากการเป็นสมาชิก';
+                   } else if (tx.transactionType === 'referral') {
+                       details = `ค่าแนะนำจาก ${tx.refereeWallet.substring(0, 6)}...${tx.refereeWallet.substring(tx.refereeWallet.length - 4)}`;
+                   }
+                   
+                   row.innerHTML = `
+                       <td>${new Date(tx.createdAt).toLocaleDateString('th-TH')}</td>
+                       <td><span class="badge ${badgeClass}">${transactionType}</span></td>
+                       <td>${details}</td>
+                       <td>${tx.amount ? tx.amount + ' USDT' : '-'}</td>
+                       <td><span class="badge badge-${tx.status === 'completed' ? 'success' : (tx.status === 'pending' ? 'warning' : 'danger')}">${tx.status}</span></td>
+                   `;
+                   
+                   transactionsBody.appendChild(row);
+               });
+           }
+           
+           // ดึงข้อมูลการแนะนำของสมาชิก
+           const referralsResponse = await fetch(`/api/members/${walletAddress}/referrals`);
+           const referralsData = await referralsResponse.json();
+           
+           if (referralsData.length === 0) {
+               referralsBody.innerHTML = '<tr><td colspan="4" class="text-center">ไม่พบข้อมูลการแนะนำ</td></tr>';
+           } else {
+               referralsBody.innerHTML = '';
+               referralsData.forEach(referral => {
+                   const row = document.createElement('tr');
+                   
+                   row.innerHTML = `
+                       <td>${new Date(referral.createdAt).toLocaleDateString('th-TH')}</td>
+                       <td>${referral.refereeWallet.substring(0, 6)}...${referral.refereeWallet.substring(referral.refereeWallet.length - 4)}</td>
+                       <td>แพลน ${referral.planId}</td>
+                       <td>${referral.commission} USDT</td>
+                   `;
+                   
+                   referralsBody.appendChild(row);
+               });
+           }
+       } catch (error) {
+           console.error('Error loading member details:', error);
+           document.getElementById('member-details-content').innerHTML = '<div class="col-12 text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</div>';
+           document.getElementById('member-transactions-body').innerHTML = '<tr><td colspan="5" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+           document.getElementById('member-referrals-body').innerHTML = '<tr><td colspan="4" class="text-center text-danger">เกิดข้อผิดพลาดในการโหลดข้อมูล</td></tr>';
+       }
+   }
+</script>
+
+<style>
+   .stats-card {
+       background-color: #fff;
+       border-radius: 8px;
+       overflow: hidden;
+       box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+       margin-bottom: 1.5rem;
+   }
+   
+   .stats-header {
+       padding: 1.5rem;
+       text-align: center;
+       color: white;
+   }
+   
+   .stats-icon {
+       font-size: 2rem;
+   }
+   
+   .stats-body {
+       padding: 1.5rem;
+       text-align: center;
+   }
+   
+   .stats-value {
+       font-size: 1.8rem;
+       font-weight: bold;
+       margin-bottom: 0.5rem;
+   }
+   
+   .stats-label {
+       color: #6c757d;
+   }
+   
+   .member-nft-image {
+       border: 1px solid #dee2e6;
+       border-radius: 8px;
+       padding: 1rem;
+       text-align: center;
+   }
+   
+   .no-nft {
+       height: 200px;
+       display: flex;
+       align-items: center;
+       justify-content: center;
+       background-color: #f8f9fa;
+       color: #6c757d;
+   }
+   
+   .member-detail-item {
+       margin-bottom: 1rem;
+       display: flex;
+   }
+   
+   .detail-label {
+       font-weight: bold;
+       width: 150px;
+   }
+   
+   .detail-value {
+       flex: 1;
+   }
+</style>
+
+<%- include('../partials/footer') %>

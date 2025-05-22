@@ -1,0 +1,181 @@
+<!-- views/owner/emergency.ejs - หน้าฟังก์ชันฉุกเฉิน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">ฟังก์ชันฉุกเฉิน</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="alert alert-warning">
+            <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> คำเตือน</h4>
+            <p>ฟังก์ชันฉุกเฉินนี้มีไว้สำหรับกรณีที่เกิดปัญหาร้ายแรงกับระบบเท่านั้น</p>
+            <p>การทำรายการถอนเงินฉุกเฉินจะถอนเงินทั้งหมดออกจากสัญญาและจะไม่สามารถย้อนกลับได้</p>
+            <p>กรุณาใช้ความระมัดระวังอย่างสูง</p>
+        </div>
+
+        <div class="system-status-section mt-4">
+            <h3>สถานะระบบปัจจุบัน</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="system-status-list">
+                                <li>
+                                    <span class="status-label">สถานะสัญญา:</span>
+                                    <span class="status-value <%= contractStatus.isPaused ? 'text-danger' : 'text-success' %>">
+                                        <%= contractStatus.isPaused ? 'หยุดชั่วคราว' : 'กำลังทำงาน' %>
+                                    </span>
+                                </li>
+                                <li>
+                                    <span class="status-label">ยอดเงินในสัญญา:</span>
+                                    <span class="status-value"><%= contractStatus.totalBalance %> USDT</span>
+                                </li>
+                                <li>
+                                    <span class="status-label">จำนวนสมาชิก:</span>
+                                    <span class="status-value"><%= contractStatus.memberCount %> คน</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="system-status-list">
+                                <li>
+                                    <span class="status-label">คำขอถอนฉุกเฉิน:</span>
+                                    <span class="status-value <%= contractStatus.hasEmergencyRequest ? 'text-warning' : 'text-success' %>">
+                                        <%= contractStatus.hasEmergencyRequest ? 'มี' : 'ไม่มี' %>
+                                    </span>
+                                </li>
+                                <% if (contractStatus.hasEmergencyRequest) { %>
+                                    <li>
+                                        <span class="status-label">เวลาคงเหลือ:</span>
+                                        <span class="status-value text-warning">
+                                            <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง 
+                                            <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที
+                                        </span>
+                                    </li>
+                                <% } %>
+                                <li>
+                                    <span class="status-label">ระยะเวลารอคอย:</span>
+                                    <span class="status-value">2 วัน</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emergency-actions-section mt-4">
+            <h3>การดำเนินการฉุกเฉิน</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="pause-contract-actions">
+                                <h4>หยุดการทำงานของสัญญา</h4>
+                                <p>การหยุดสัญญาจะป้องกันไม่ให้มีการทำธุรกรรมใหม่ในระบบ</p>
+                                <form action="/admin/settings/set-paused" method="POST" class="mb-3">
+                                    <input type="hidden" name="isPaused" value="<%= !contractStatus.isPaused %>">
+                                    <button type="submit" class="btn btn-<%= contractStatus.isPaused ? 'success' : 'warning' %> btn-lg btn-block">
+                                        <i class="fas fa-<%= contractStatus.isPaused ? 'play' : 'pause' %>"></i> 
+                                        <%= contractStatus.isPaused ? 'เริ่มการทำงานสัญญา' : 'หยุดการทำงานสัญญา' %>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="emergency-withdraw-actions">
+                                <h4>การถอนเงินฉุกเฉิน</h4>
+                                <p>ฟังก์ชันนี้จะถอนเงินทั้งหมดและหยุดการทำงานของสัญญา</p>
+                                
+                                <% if (!contractStatus.hasEmergencyRequest) { %>
+                                    <!-- ไม่มีคำขอถอนเงินฉุกเฉิน -->
+                                    <form action="/owner/emergency/request" method="POST">
+                                        <button type="submit" class="btn btn-danger btn-lg btn-block" onclick="return confirm('คุณแน่ใจหรือไม่ที่จะขอถอนเงินฉุกเฉิน? การดำเนินการนี้ต้องรอ 2 วันจึงจะดำเนินการได้')">
+                                            <i class="fas fa-exclamation-circle"></i> ขอถอนเงินฉุกเฉิน
+                                        </button>
+                                    </form>
+                                <% } else if (contractStatus.emergencyTimeRemaining <= 0) { %>
+                                    <!-- คำขอถอนเงินฉุกเฉินพร้อมดำเนินการแล้ว -->
+                                    <div class="alert alert-danger">
+                                        <p><strong>คำขอถอนเงินฉุกเฉินพร้อมดำเนินการแล้ว</strong></p>
+                                        <p>ระยะเวลารอคอย 2 วันผ่านไปแล้ว คุณสามารถถอนเงินฉุกเฉินได้ทันที</p>
+                                    </div>
+                                    <form action="/owner/emergency/withdraw" method="POST">
+                                        <button type="submit" class="btn btn-danger btn-lg btn-block" onclick="return confirm('คุณแน่ใจหรือไม่ที่จะดำเนินการถอนเงินฉุกเฉิน? การดำเนินการนี้ไม่สามารถย้อนกลับได้')">
+                                            <i class="fas fa-exclamation-circle"></i> ดำเนินการถอนเงินฉุกเฉิน
+                                        </button>
+                                    </form>
+                                <% } else { %>
+                                    <!-- มีคำขอถอนเงินฉุกเฉินแต่ยังไม่พร้อมดำเนินการ -->
+                                    <div class="alert alert-info">
+                                        <p><strong>คำขอถอนเงินฉุกเฉินกำลังรอดำเนินการ</strong></p>
+                                        <p>ระยะเวลารอคอยคงเหลือ: <%= Math.floor(contractStatus.emergencyTimeRemaining / 3600) %> ชั่วโมง <%= Math.floor((contractStatus.emergencyTimeRemaining % 3600) / 60) %> นาที</p>
+                                    </div>
+                                    <form action="/owner/emergency/cancel" method="POST">
+                                        <button type="submit" class="btn btn-secondary btn-lg btn-block">
+                                            <i class="fas fa-times"></i> ยกเลิกคำขอถอนเงินฉุกเฉิน
+                                        </button>
+                                    </form>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="emergency-info-section mt-4">
+            <h3>ข้อมูลเพิ่มเติม</h3>
+            <div class="card">
+                <div class="card-body">
+                    <h4>วิธีการทำงานของระบบถอนเงินฉุกเฉิน</h4>
+                    <ol>
+                        <li><strong>ขอถอนเงินฉุกเฉิน:</strong> เมื่อขอถอนเงินฉุกเฉิน ระบบจะเริ่มนับเวลารอคอย 2 วัน</li>
+                        <li><strong>ระยะเวลารอคอย:</strong> การถอนเงินฉุกเฉินจะไม่สามารถดำเนินการได้ทันที ต้องรอ 2 วันเพื่อให้ทุกคนมีเวลาเตรียมตัว</li>
+                        <li><strong>ดำเนินการถอนเงิน:</strong> หลังจากครบ 2 วัน คุณจะสามารถดำเนินการถอนเงินทั้งหมดออกจากสัญญาได้</li>
+                        <li><strong>การกระจายเงิน:</strong> เงินทั้งหมดจะถูกโอนไปยังที่อยู่กระเป๋าของเจ้าของระบบ</li>
+                    </ol>
+                    
+                    <h4 class="mt-3">ข้อควรระวัง</h4>
+                    <ul>
+                        <li>การถอนเงินฉุกเฉินควรทำเฉพาะในกรณีที่จำเป็นจริงๆ เท่านั้น</li>
+                        <li>การถอนเงินฉุกเฉินจะส่งผลให้สมาชิกไม่สามารถถอนเงินหรือรับผลตอบแทนได้อีกต่อไป</li>
+                        <li>คุณควรแจ้งให้สมาชิกทุกคนทราบก่อนดำเนินการถอนเงินฉุกเฉิน</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .system-status-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .system-status-list li {
+        margin-bottom: 0.75rem;
+        display: flex;
+        justify-content: space-between;
+    }
+    
+    .status-label {
+        font-weight: bold;
+    }
+    
+    .text-success {
+        color: #2ecc71;
+    }
+    
+    .text-warning {
+        color: #f39c12;
+    }
+    
+    .text-danger {
+        color: #e74c3c;
+    }
+</style>
+
+<%- include('../partials/footer') %>

@@ -1,0 +1,137 @@
+<!-- views/index.ejs - หน้าแรกของเว็บไซต์ -->
+
+<%- include('./partials/header') %>
+
+<!-- Hero Section -->
+<section class="hero bg-primary text-light p-3">
+    <div class="container text-center">
+        <h1>Crypto Membership NFT</h1>
+        <p class="my-3">ระบบสมาชิกดิจิทัลบนบล็อกเชนที่ปลอดภัยและน่าเชื่อถือ</p>
+        <div class="hero-buttons">
+            <a href="/register" class="btn btn-secondary">สมัครสมาชิกเลย</a>
+            <a href="/plans" class="btn btn-light">ดูแพลนทั้งหมด</a>
+        </div>
+    </div>
+</section>
+
+<!-- แนะนำแพลนสมาชิก -->
+<section class="plans py-5">
+    <div class="container">
+        <h2 class="text-center mb-3">แพลนสมาชิก</h2>
+        <p class="text-center mb-3">เลือกแพลนที่เหมาะกับคุณและเริ่มต้นใช้งานได้ทันที</p>
+        
+        <div class="row">
+            <% for(let i = 0; i < Math.min(plans.length, 3); i++) { %>
+                <div class="col-md-4">
+                    <div class="plan-card">
+                        <div class="plan-header">
+                            <h3>แพลน <%= plans[i].name %></h3>
+                            <div class="plan-price"><%= plans[i].price %> USDT</div>
+                        </div>
+                        <div class="plan-features">
+                            <ul>
+                                <li>สมาชิกต่อรอบ: <%= plans[i].membersPerCycle %> คน</li>
+                                <li>รอบปัจจุบัน: <%= plans[i].currentCycle %></li>
+                                <li>สมาชิกในรอบปัจจุบัน: <%= plans[i].membersInCurrentCycle %> / <%= plans[i].membersPerCycle %></li>
+                                <li>รองรับระบบแนะนำ (Referral)</li>
+                                <li>รับ NFT สมาชิก</li>
+                            </ul>
+                        </div>
+                        <div class="plan-footer">
+                            <a href="/register?plan=<%= plans[i].id %>" class="btn btn-primary btn-block">สมัครเลย</a>
+                        </div>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="text-center mt-3">
+            <a href="/plans" class="btn btn-primary">ดูแพลนทั้งหมด</a>
+        </div>
+    </div>
+</section>
+
+<!-- วิธีการสมัครสมาชิก -->
+<section class="how-to bg-light py-5">
+    <div class="container">
+        <h2 class="text-center mb-3">วิธีการสมัครสมาชิก</h2>
+        <p class="text-center mb-3">เพียง 3 ขั้นตอนง่ายๆ คุณก็สามารถเป็นสมาชิกของเราได้แล้ว</p>
+        
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="step-icon">
+                            <i class="fas fa-wallet fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="mt-3">1. เชื่อมต่อกระเป๋า</h3>
+                        <p>เชื่อมต่อกระเป๋า Metamask ของคุณเข้ากับเว็บไซต์ของเรา</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="step-icon">
+                            <i class="fas fa-hand-pointer fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="mt-3">2. เลือกแพลน</h3>
+                        <p>เลือกแพลนสมาชิกที่เหมาะกับคุณ</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="step-icon">
+                            <i class="fas fa-check-circle fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="mt-3">3. ยืนยันการสมัคร</h3>
+                        <p>ยืนยันการทำธุรกรรมและรับ NFT สมาชิกทันที</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- คุณสมบัติของระบบ -->
+<section class="features py-5">
+    <div class="container">
+        <h2 class="text-center mb-3">คุณสมบัติของระบบ</h2>
+        <p class="text-center mb-3">ระบบสมาชิกของเรามาพร้อมกับคุณสมบัติที่น่าสนใจมากมาย</p>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <i class="fas fa-shield-alt text-primary"></i>
+                    <h3>ปลอดภัยด้วยบล็อกเชน</h3>
+                    <p>ระบบของเราทำงานบนบล็อกเชนที่มีความปลอดภัยสูง ไม่มีใครสามารถเปลี่ยนแปลงข้อมูลได้</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <i class="fas fa-image text-primary"></i>
+                    <h3>NFT สมาชิก</h3>
+                    <p>รับ NFT สมาชิกที่ไม่ซ้ำใคร เป็นเครื่องยืนยันการเป็นสมาชิกของคุณ</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <i class="fas fa-users text-primary"></i>
+                    <h3>ระบบแนะนำ</h3>
+                    <p>แนะนำเพื่อนและรับค่าคอมมิชชั่นทันที ยิ่งแนะนำมาก ยิ่งได้รับมาก</p>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="feature-item">
+                    <i class="fas fa-arrow-up text-primary"></i>
+                    <h3>อัพเกรดแพลน</h3>
+                    <p>สามารถอัพเกรดแพลนได้ตลอดเวลา เพื่อรับสิทธิประโยชน์ที่มากขึ้น</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<%- include('./partials/footer') %>

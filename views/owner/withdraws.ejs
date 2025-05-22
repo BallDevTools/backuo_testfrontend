@@ -1,0 +1,280 @@
+<!-- views/owner/withdrawals.ejs - หน้าจัดการการถอนเงิน -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">จัดการการถอนเงิน</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="withdrawal-stats-card">
+                    <div class="withdrawal-stats-header bg-primary text-white">
+                        <h3>เงินเจ้าของ</h3>
+                    </div>
+                    <div class="withdrawal-stats-body">
+                        <h4 class="withdrawal-stats-value"><%= systemStats.ownerFunds %> USDT</h4>
+                        <p>ยอดเงินที่สามารถถอนได้</p>
+                        <form action="/owner/withdrawals/withdraw" method="POST" class="withdrawal-form">
+                            <input type="hidden" name="balanceType" value="0">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input type="number" name="amount" class="form-control" placeholder="จำนวนเงิน" step="0.01" min="0.01" max="<%= systemStats.ownerFunds %>" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">USDT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">ถอนเงิน</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="withdrawal-stats-card">
+                    <div class="withdrawal-stats-header bg-success text-white">
+                        <h3>เงินค่าธรรมเนียม</h3>
+                    </div>
+                    <div class="withdrawal-stats-body">
+                        <h4 class="withdrawal-stats-value"><%= systemStats.feeFunds %> USDT</h4>
+                        <p>ยอดเงินที่สามารถถอนได้</p>
+                        <form action="/owner/withdrawals/withdraw" method="POST" class="withdrawal-form">
+                            <input type="hidden" name="balanceType" value="1">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input type="number" name="amount" class="form-control" placeholder="จำนวนเงิน" step="0.01" min="0.01" max="<%= systemStats.feeFunds %>" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">USDT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-success btn-block">ถอนเงิน</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="withdrawal-stats-card">
+                    <div class="withdrawal-stats-header bg-warning text-white">
+                        <h3>เงินกองทุน</h3>
+                    </div>
+                    <div class="withdrawal-stats-body">
+                        <h4 class="withdrawal-stats-value"><%= systemStats.fundFunds %> USDT</h4>
+                        <p>ยอดเงินที่สามารถถอนได้</p>
+                        <form action="/owner/withdrawals/withdraw" method="POST" class="withdrawal-form">
+                            <input type="hidden" name="balanceType" value="2">
+                            <div class="form-group">
+                                <div class="input-group">
+                                    <input type="number" name="amount" class="form-control" placeholder="จำนวนเงิน" step="0.01" min="0.01" max="<%= systemStats.fundFunds %>" required>
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">USDT</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-block">ถอนเงิน</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="withdrawal-batch mt-4">
+            <h3>การถอนเงินแบบกลุ่ม</h3>
+            <form action="/owner/withdrawals/batch-withdraw" method="POST">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="batch-withdrawal-items" id="batch-withdrawal-container">
+                            <div class="batch-withdrawal-item">
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="form-group">
+                                            <label>ที่อยู่ผู้รับ</label>
+                                            <input type="text" name="recipients[]" class="form-control" placeholder="0x..." required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>จำนวนเงิน</label>
+                                            <div class="input-group">
+                                                <input type="number" name="amounts[]" class="form-control" placeholder="จำนวนเงิน" step="0.01" min="0.01" required>
+                                                <div class="input-group-append">
+                                                    <span class="input-group-text">USDT</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="form-group">
+                                            <label>ประเภทเงิน</label>
+                                            <select name="balanceTypes[]" class="form-control" required>
+                                                <option value="0">เงินเจ้าของ</option>
+                                                <option value="1">เงินค่าธรรมเนียม</option>
+                                                <option value="2">เงินกองทุน</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <div class="form-group">
+                                            <label>&nbsp;</label>
+                                            <button type="button" class="btn btn-danger btn-block remove-item" style="display: none;">ลบ</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="batch-actions mt-3">
+                            <button type="button" id="add-item-btn" class="btn btn-info">
+                                <i class="fas fa-plus"></i> เพิ่มรายการ
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> ส่งการถอนเงินแบบกลุ่ม
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        
+        <div class="withdrawal-history mt-4">
+            <h3>ประวัติการถอนเงิน</h3>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>ประเภทเงิน</th>
+                            <th>จำนวนเงิน</th>
+                            <th>ที่อยู่ผู้รับ</th>
+                            <th>Hash ธุรกรรม</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (withdrawals && withdrawals.length > 0) { %>
+                            <% withdrawals.forEach(withdrawal => { %>
+                                <tr>
+                                    <td><%= new Date(withdrawal.createdAt).toLocaleDateString('th-TH') %></td>
+                                    <td>
+                                        <% if (withdrawal.balanceType === 0) { %>
+                                            <span class="badge badge-primary">เงินเจ้าของ</span>
+                                        <% } else if (withdrawal.balanceType === 1) { %>
+                                            <span class="badge badge-success">เงินค่าธรรมเนียม</span>
+                                        <% } else { %>
+                                            <span class="badge badge-warning">เงินกองทุน</span>
+                                        <% } %>
+                                    </td>
+                                    <td><%= withdrawal.amount %> USDT</td>
+                                    <td><%= withdrawal.recipient.substring(0, 6) %>...
+                                      <%= withdrawal.recipient.substring(withdrawal.recipient.length - 4) %></td>
+                                    <td>
+                                        <% if (withdrawal.txHash) { %>
+                                            <a href="https://bscscan.com/tx/<%= withdrawal.txHash %>" target="_blank" class="txhash-link">
+                                                <%= withdrawal.txHash.substring(0, 6) %>...
+                                                <%= withdrawal.txHash.substring(withdrawal.txHash.length - 4) %>
+                                            </a>
+                                        <% } else { %>
+                                            -
+                                        <% } %>
+                                    </td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center">ยังไม่มีประวัติการถอนเงิน</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // เพิ่มรายการถอนเงินแบบกลุ่ม
+        const addItemBtn = document.getElementById('add-item-btn');
+        const batchContainer = document.getElementById('batch-withdrawal-container');
+        
+        addItemBtn.addEventListener('click', function() {
+            const itemTemplate = document.querySelector('.batch-withdrawal-item').cloneNode(true);
+            const inputs = itemTemplate.querySelectorAll('input');
+            const selects = itemTemplate.querySelectorAll('select');
+            
+            inputs.forEach(input => {
+                input.value = '';
+            });
+            
+            selects.forEach(select => {
+                select.selectedIndex = 0;
+            });
+            
+            // แสดงปุ่มลบสำหรับทุกรายการ
+            const removeButtons = document.querySelectorAll('.remove-item');
+            removeButtons.forEach(button => {
+                button.style.display = 'block';
+            });
+            
+            itemTemplate.querySelector('.remove-item').style.display = 'block';
+            batchContainer.appendChild(itemTemplate);
+            
+            // ผูกเหตุการณ์คลิกปุ่มลบ
+            itemTemplate.querySelector('.remove-item').addEventListener('click', function() {
+                batchContainer.removeChild(itemTemplate);
+                
+                // ซ่อนปุ่มลบของรายการแรกถ้ามีเพียงรายการเดียว
+                if (document.querySelectorAll('.batch-withdrawal-item').length === 1) {
+                    document.querySelector('.remove-item').style.display = 'none';
+                }
+            });
+        });
+    });
+</script>
+
+<style>
+    .withdrawal-stats-card {
+        border: 1px solid #eee;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .withdrawal-stats-header {
+        padding: 1rem;
+        text-align: center;
+    }
+    
+    .withdrawal-stats-header h3 {
+        margin: 0;
+        font-size: 1.2rem;
+    }
+    
+    .withdrawal-stats-body {
+        padding: 1.5rem;
+        background-color: #fff;
+    }
+    
+    .withdrawal-stats-value {
+        font-size: 1.8rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .batch-withdrawal-item {
+        padding: 1rem;
+        border: 1px solid #eee;
+        border-radius: 5px;
+        margin-bottom: 1rem;
+        background-color: #f9f9f9;
+    }
+    
+    .txhash-link {
+        color: #3498db;
+        text-decoration: underline;
+    }
+</style>
+
+<%- include('../partials/footer') %>

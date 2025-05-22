@@ -1,0 +1,116 @@
+<!-- views/plans.ejs - หน้าแสดงแพลนทั้งหมด -->
+
+<%- include('./partials/header') %>
+
+<section class="plans-page py-5">
+    <div class="container">
+        <h1 class="text-center mb-4">แพลนสมาชิกทั้งหมด</h1>
+        <p class="text-center mb-5">เลือกแพลนที่เหมาะกับคุณและเริ่มต้นใช้งานได้ทันที</p>
+        
+        <div class="row">
+            <% if (plans && plans.length > 0) { %>
+                <% plans.forEach(plan => { %>
+                    <div class="col-md-4 mb-4">
+                        <div class="plan-card">
+                            <div class="plan-header">
+                                <h3>แพลน <%= plan.name %></h3>
+                                <div class="plan-price"><%= plan.price %> USDT</div>
+                            </div>
+                            <div class="plan-features">
+                                <ul>
+                                    <li>สมาชิกต่อรอบ: <%= plan.membersPerCycle %> คน</li>
+                                    <li>รอบปัจจุบัน: <%= plan.currentCycle %></li>
+                                    <li>สมาชิกในรอบปัจจุบัน: <%= plan.membersInCurrentCycle %> / <%= plan.membersPerCycle %></li>
+                                    <li>รองรับระบบแนะนำ (Referral)</li>
+                                    <li>รับ NFT สมาชิก</li>
+                                    <% if (plan.id > 1) { %>
+                                        <li>ค่าคอมมิชชั่นเพิ่มขึ้น <%= 5 + (plan.id * 2) %>%</li>
+                                    <% } else { %>
+                                        <li>ค่าคอมมิชชั่นพื้นฐาน 10%</li>
+                                    <% } %>
+                                </ul>
+                            </div>
+                            <div class="plan-footer">
+                                <% if (plan.isActive) { %>
+                                    <% if (plan.id === 1) { %>
+                                        <a href="/register?plan=<%= plan.id %>" class="btn btn-primary btn-block">สมัครเลย</a>
+                                    <% } else { %>
+                                        <a href="/user/upgrade?plan=<%= plan.id %>" class="btn btn-primary btn-block">อัพเกรดเลย</a>
+                                    <% } %>
+                                <% } else { %>
+                                    <button class="btn btn-secondary btn-block" disabled>ปิดใช้งานชั่วคราว</button>
+                                <% } %>
+                            </div>
+                        </div>
+                    </div>
+                <% }) %>
+            <% } else { %>
+                <div class="col-12 text-center">
+                    <div class="alert alert-info">
+                        <p>ไม่พบข้อมูลแพลน กรุณาลองใหม่อีกครั้ง</p>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="plans-info mt-5">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>วิธีการอัพเกรดแพลน</h3>
+                        </div>
+                        <div class="card-body">
+                            <ol>
+                                <li>สมัครเริ่มต้นที่แพลน 1</li>
+                                <li>หลังจากสมัครแล้ว คุณสามารถอัพเกรดได้ทีละแพลน</li>
+                                <li>เมื่ออัพเกรด คุณจะต้องจ่ายเพียงส่วนต่างของราคาเท่านั้น</li>
+                                <li>NFT สมาชิกของคุณจะอัพเกรดโดยอัตโนมัติ</li>
+                                <li>แพลนที่สูงขึ้นจะได้รับค่าคอมมิชชั่นเพิ่มขึ้น</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h3>สิทธิประโยชน์ของสมาชิก</h3>
+                        </div>
+                        <div class="card-body">
+                            <ul>
+                                <li>รับ NFT สมาชิกที่ไม่ซ้ำกัน</li>
+                                <li>ค่าคอมมิชชั่นจากการแนะนำสมาชิกใหม่</li>
+                                <li>รับโบนัสเมื่อสมาชิกในรอบของคุณครบจำนวน</li>
+                                <li>สามารถใช้สิทธิพิเศษในกิจกรรมต่างๆ ของระบบ</li>
+                                <li>สามารถถอนเงินจากระบบได้หากต้องการออกจากการเป็นสมาชิก (หลังจาก 30 วัน)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="text-center mt-5">
+            <a href="/register" class="btn btn-primary btn-lg">เริ่มต้นตอนนี้</a>
+        </div>
+    </div>
+</section>
+
+<style>
+    .plan-card {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: transform 0.3s ease;
+    }
+    
+    .plan-card:hover {
+        transform: translateY(-10px);
+    }
+    
+    .plan-features {
+        flex-grow: 1;
+    }
+</style>
+
+<%- include('./partials/footer') %>

@@ -1,0 +1,165 @@
+<!-- views/user/referrals.ejs - หน้าการแนะนำ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-card">
+    <div class="dashboard-card-header">
+        <h2 class="dashboard-card-title">การแนะนำของคุณ</h2>
+    </div>
+    <div class="dashboard-card-body">
+        <div class="referral-stats">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="referral-stat-item">
+                        <div class="referral-stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="referral-stat-info">
+                            <div class="referral-stat-value"><%= memberInfo.totalReferrals %></div>
+                            <div class="referral-stat-label">จำนวนการแนะนำทั้งหมด</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="referral-stat-item">
+                        <div class="referral-stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="referral-stat-info">
+                            <div class="referral-stat-value"><%= memberInfo.totalEarnings %> USDT</div>
+                            <div class="referral-stat-label">รายได้ทั้งหมด</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="referral-stat-item">
+                        <div class="referral-stat-icon">
+                            <i class="fas fa-percentage"></i>
+                        </div>
+                        <div class="referral-stat-info">
+                            <div class="referral-stat-value">10-20%</div>
+                            <div class="referral-stat-label">อัตราค่าคอมมิชชั่น</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="referral-link-section mt-4">
+            <h3>ลิงก์แนะนำของคุณ</h3>
+            <div class="card">
+                <div class="card-body">
+                    <p>แชร์ลิงก์นี้กับเพื่อนและรับค่าคอมมิชชั่นทันทีเมื่อพวกเขาสมัครผ่านลิงก์ของคุณ</p>
+                    <div class="input-group mb-3">
+                        <input type="text" id="referral-link" class="form-control" value="<%= referralLink %>" readonly>
+                        <div class="input-group-append">
+                            <button class="btn btn-primary" type="button" id="copy-referral-btn">
+                                <i class="fas fa-copy"></i> คัดลอกลิงก์
+                            </button>
+                        </div>
+                    </div>
+                    <div class="social-share-buttons mt-3">
+                        <a href="https://www.facebook.com/sharer/sharer.php?u=<%= encodeURIComponent(referralLink) %>" target="_blank" class="btn btn-sm btn-primary">
+                            <i class="fab fa-facebook-f"></i> Facebook
+                        </a>
+                        <a href="https://twitter.com/intent/tweet?text=<%= encodeURIComponent('สมัครสมาชิก Crypto Membership NFT ผ่านลิงก์ของฉัน:') %>&url=<%= encodeURIComponent(referralLink) %>" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </a>
+                        <a href="https://t.me/share/url?url=<%= encodeURIComponent(referralLink) %>&text=<%= encodeURIComponent('สมัครสมาชิก Crypto Membership NFT ผ่านลิงก์ของฉัน:') %>" target="_blank" class="btn btn-sm btn-info">
+                            <i class="fab fa-telegram-plane"></i> Telegram
+                        </a>
+                        <a href="https://line.me/R/msg/text/?<%= encodeURIComponent('สมัครสมาชิก Crypto Membership NFT ผ่านลิงก์ของฉัน: ' + referralLink) %>" target="_blank" class="btn btn-sm btn-success">
+                            <i class="fab fa-line"></i> LINE
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="referral-how-it-works mt-4">
+            <h3>วิธีการทำงานของระบบแนะนำ</h3>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="referral-step text-center">
+                                <div class="referral-step-icon">
+                                    <i class="fas fa-share-alt"></i>
+                                </div>
+                                <h4>1. แชร์ลิงก์</h4>
+                                <p>แชร์ลิงก์แนะนำของคุณกับเพื่อนและครอบครัว</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="referral-step text-center">
+                                <div class="referral-step-icon">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <h4>2. เพื่อนสมัคร</h4>
+                                <p>เพื่อนของคุณสมัครสมาชิกผ่านลิงก์ของคุณ</p>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="referral-step text-center">
+                                <div class="referral-step-icon">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <h4>3. รับค่าคอมมิชชั่น</h4>
+                                <p>คุณได้รับค่าคอมมิชชั่นทันทีที่การสมัครเสร็จสมบูรณ์</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="referral-history mt-4">
+            <h3>ประวัติการแนะนำ</h3>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>วันที่</th>
+                            <th>ที่อยู่กระเป๋า</th>
+                            <th>แพลน</th>
+                            <th>ค่าคอมมิชชั่น</th>
+                            <th>สถานะ</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (referrals && referrals.length > 0) { %>
+                            <% referrals.forEach(referral => { %>
+                                <tr>
+                                    <td><%= new Date(referral.createdAt).toLocaleDateString('th-TH') %></td>
+                                    <td><%= referral.refereeWallet.substring(0, 6) %>...
+                                      <%= referral.refereeWallet.substring(referral.refereeWallet.length - 4) %></td>
+                                    <td>แพลน <%= referral.planId %></td>
+                                    <td><%= referral.commission %> USDT</td>
+                                    <td><span class="badge badge-success">สำเร็จ</span></td>
+                                </tr>
+                            <% }) %>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="5" class="text-center">ยังไม่มีประวัติการแนะนำ</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // คัดลอกลิงก์แนะนำ
+    document.getElementById('copy-referral-btn').addEventListener('click', function() {
+        const referralLink = document.getElementById('referral-link');
+        navigator.clipboard.writeText(referralLink.value).then(function() {
+            alert('คัดลอกลิงก์อ้างอิงเรียบร้อยแล้ว');
+        }, function(err) {
+            console.error('Error copying text: ', err);
+        });
+    });
+</script>
+
+<%- include('../partials/footer') %>
