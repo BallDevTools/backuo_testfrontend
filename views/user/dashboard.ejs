@@ -1,0 +1,143 @@
+<!-- views/user/dashboard.ejs - หน้าแดชบอร์ดสำหรับผู้ใช้ -->
+
+<%- include('../partials/header') %>
+
+<div class="dashboard-stats">
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon primary">
+            <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value">แพลน <%= currentPlan.name %></div>
+            <div class="dashboard-stat-label">แพลนปัจจุบันของคุณ</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon success">
+            <i class="fas fa-users"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= memberInfo.totalReferrals %></div>
+            <div class="dashboard-stat-label">การแนะนำทั้งหมด</div>
+        </div>
+    </div>
+    
+    <div class="dashboard-stat-card">
+        <div class="dashboard-stat-icon warning">
+            <i class="fas fa-money-bill-wave"></i>
+        </div>
+        <div class="dashboard-stat-info">
+            <div class="dashboard-stat-value"><%= memberInfo.totalEarnings %> USDT</div>
+            <div class="dashboard-stat-label">รายได้จากการแนะนำ</div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">NFT สมาชิกของคุณ</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="nft-card">
+                    <div class="nft-image">
+                        <% if (tokenMetadata && tokenMetadata.image) { %>
+                            <img src="<%= tokenMetadata.image %>" alt="NFT Image">
+                        <% } else { %>
+                            <div class="nft-placeholder">
+                                <i class="fas fa-image"></i>
+                            </div>
+                        <% } %>
+                    </div>
+                    <div class="nft-details">
+                        <h3 class="nft-title">NFT สมาชิก #<%= tokenMetadata ? tokenMetadata.tokenId : 'N/A' %></h3>
+                        <div class="nft-info">
+                            <span>รอบที่: <%= memberInfo.cycleNumber %></span>
+                            <span>วันที่ลงทะเบียน: <%= memberInfo.registeredAt.toLocaleDateString('th-TH') %></span>
+                            <% if (tokenMetadata && tokenMetadata.tokenId) { %>
+                                <span>Token ID: <%= tokenMetadata.tokenId %></span>
+                            <% } %>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <% if (nextPlan) { %>
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">อัพเกรดแพลน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="current-plan">
+                            <h3>แพลนปัจจุบัน</h3>
+                            <div class="plan-card">
+                                <div class="plan-header">
+                                    <h3>แพลน <%= currentPlan.name %></h3>
+                                    <div class="plan-price"><%= currentPlan.price %> USDT</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="next-plan">
+                            <h3>แพลนถัดไป</h3>
+                            <div class="plan-card">
+                                <div class="plan-header">
+                                    <h3>แพลน <%= nextPlan.name %></h3>
+                                    <div class="plan-price"><%= nextPlan.price %> USDT</div>
+                                </div>
+                                <div class="plan-footer">
+                                    <a href="/user/upgrade" class="btn btn-primary btn-block">อัพเกรดเลย</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <% } %>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="dashboard-card">
+            <div class="dashboard-card-header">
+                <h2 class="dashboard-card-title">รายละเอียดแพลน</h2>
+            </div>
+            <div class="dashboard-card-body">
+                <ul class="plan-details-list">
+                    <li>
+                        <span class="plan-detail-label">แพลนปัจจุบัน:</span>
+                        <span class="plan-detail-value">แพลน <%= currentPlan.name %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">ราคาแพลน:</span>
+                        <span class="plan-detail-value"><%= currentPlan.price %> USDT</span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">รอบปัจจุบัน:</span>
+                        <span class="plan-detail-value"><%= memberInfo.cycleNumber %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">สมาชิกต่อรอบ:</span>
+                        <span class="plan-detail-value"><%= currentPlan.membersPerCycle %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">สมาชิกในรอบนี้:</span>
+                        <span class="plan-detail-value"><%= currentPlan.membersInCurrentCycle %> / <%= currentPlan.membersPerCycle %></span>
+                    </li>
+                    <li>
+                        <span class="plan-detail-label">วันที่สมัคร:</span>
+                        <span class="plan-detail-value"><%= memberInfo.registeredAt.toLocaleDateString('th-TH') %></span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<%- include('../partials/footer') %> 

@@ -8,8 +8,8 @@
     <meta name="description" content="ระบบสมาชิก NFT บนบล็อกเชน">
     
     <!-- ข้อมูลเครือข่ายบล็อกเชน -->
-    <meta name="network-id" content="1">
-    <meta name="network-name" content="Ethereum Mainnet">
+    <meta name="network-id" content="<%= process.env.NETWORK_ID || '97' %>">
+    <meta name="network-name" content="<%= process.env.NETWORK_NAME || 'bsc_testnet' %>">
     
     <!-- ข้อมูลสัญญา -->
     <meta name="contract-address" content="<%= process.env.CONTRACT_ADDRESS_TEST || '0xd0B795ce48108a8F2C668Dc13ab8184260374b2D' %>">

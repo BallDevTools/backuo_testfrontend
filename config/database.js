@@ -38,8 +38,8 @@ const initDB = async () => {
       // เพิ่มผู้ใช้เริ่มต้น (รหัสผ่านเป็น bcrypt hash)
       await connection.query(`
         INSERT INTO admin_users (username, password_hash, role) VALUES 
-        ('admin', '$2a$10$XFE5XTkhNh4HA1xLvf6Xhu4ZVcA4lh3sP3pnVrDKV3PeWl/F7wVbm', 'admin'),
-        ('owner', '$2a$10$CeX0LwzHlG9mZZ7QEoqxwu.7f1cUtzM.2IdhVr0TVKbHcIQgF6M0u', 'owner')
+        ('admin', '$2a$04$xAnC35wFxRdK01IJ8m..c.8CAcRXZNx9.AYq5XLyKgZbZpZ56PJN6', 'admin'),
+        ('owner', '$2a$04$xAnC35wFxRdK01IJ8m..c.8CAcRXZNx9.AYq5XLyKgZbZpZ56PJN6', 'owner')
       `);
       console.log('Default admin/owner users created');
     }

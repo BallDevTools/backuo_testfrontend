@@ -5,6 +5,7 @@ const cookieParser = require('cookie-parser');
 const session = require('express-session');
 const flash = require('connect-flash');
 const dotenv = require('dotenv');
+const MySQLStore = require('express-mysql-session')(session);
 
 // โหลดไฟล์ .env
 dotenv.config();
@@ -31,10 +32,30 @@ app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'crypto-membership-secret',
+  secret: process.env.SESSION_SECRET || 'your-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { maxAge: 60 * 60 * 1000 } // 1 hour
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    httpOnly: true,
+    maxAge: 30 * 24 * 60 * 60 * 1000 // 30 วัน
+  },
+  store: new MySQLStore({
+    host: process.env.DB_HOST,
+    port: process.env.DB_PORT,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    createDatabaseTable: true,
+    schema: {
+      tableName: 'sessions',
+      columnNames: {
+        session_id: 'session_id',
+        expires: 'expires',
+        data: 'data'
+      }
+    }
+  })
 }));
 app.use(flash());
 

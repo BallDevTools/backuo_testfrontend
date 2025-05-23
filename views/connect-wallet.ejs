@@ -1,0 +1,113 @@
+<!-- views/connect-wallet.ejs - หน้าเชื่อมต่อกระเป๋า -->
+
+<%- include('./partials/header') %>
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-6 mx-auto">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">เชื่อมต่อกระเป๋า</h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-wallet fa-4x text-primary mb-3"></i>
+                        <h4>เชื่อมต่อกระเป๋าเพื่อเริ่มใช้งาน</h4>
+                        <p class="text-muted">คุณต้องเชื่อมต่อกระเป๋าก่อนที่จะสามารถใช้งานระบบได้</p>
+                    </div>
+
+                    <div class="wallet-connection">
+                        <button id="connect-wallet-btn" class="btn btn-primary btn-block btn-lg">
+                            <i class="fab fa-ethereum me-2"></i>
+                            เชื่อมต่อ MetaMask
+                        </button>
+                    </div>
+
+                    <div class="mt-4">
+                        <div class="alert alert-info">
+                            <h5>คำแนะนำ:</h5>
+                            <ol>
+                                <li>ติดตั้ง MetaMask ในเบราว์เซอร์ของคุณ (ถ้ายังไม่ได้ติดตั้ง)</li>
+                                <li>คลิกปุ่ม "เชื่อมต่อ MetaMask" ด้านบน</li>
+                                <li>ยืนยันการเชื่อมต่อในหน้าต่าง MetaMask</li>
+                                <li>เลือกเครือข่ายที่ถูกต้อง (BSC Testnet)</li>
+                            </ol>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const connectWalletBtn = document.getElementById('connect-wallet-btn');
+
+        connectWalletBtn.addEventListener('click', async () => {
+            try {
+                // ตรวจสอบว่ามี MetaMask หรือไม่
+                if (typeof window.ethereum === 'undefined') {
+                    alert('กรุณาติดตั้ง MetaMask ก่อนใช้งาน');
+                    window.open('https://metamask.io/download/', '_blank');
+                    return;
+                }
+
+                // ขอการเชื่อมต่อกับ MetaMask
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                const address = accounts[0];
+
+                // ตรวจสอบเครือข่าย
+                const networkId = parseInt(document.querySelector('meta[name="network-id"]').content);
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                
+                if (parseInt(chainId, 16) !== networkId) {
+                    try {
+                        // พยายามเปลี่ยนเครือข่าย
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: `0x${networkId.toString(16)}` }],
+                        });
+                    } catch (switchError) {
+                        // ถ้าเครือข่ายไม่มีใน MetaMask
+                        if (switchError.code === 4902) {
+                            alert('กรุณาเพิ่มเครือข่าย BSC Testnet ใน MetaMask');
+                            return;
+                        }
+                        throw switchError;
+                    }
+                }
+
+                // บันทึกที่อยู่กระเป๋าลงใน session
+                const response = await fetch('/api/wallet/connect', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ address })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // ตรวจสอบว่าเป็นสมาชิกหรือไม่
+                    const isMemberResponse = await fetch(`/api/members/check-member?address=${address}`);
+                    const isMemberData = await isMemberResponse.json();
+
+                    if (isMemberData.isMember) {
+                        window.location.href = '/user/dashboard';
+                    } else {
+                        window.location.href = '/register';
+                    }
+                } else {
+                    alert(data.message || 'เกิดข้อผิดพลาดในการเชื่อมต่อกระเป๋า');
+                }
+            } catch (error) {
+                console.error('Error connecting wallet:', error);
+                alert('เกิดข้อผิดพลาดในการเชื่อมต่อกระเป๋า: ' + error.message);
+            }
+        });
+    });
+</script>
+
+<%- include('./partials/footer') %> 

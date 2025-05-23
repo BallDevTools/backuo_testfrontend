@@ -15,10 +15,10 @@ module.exports = {
   wsUrl: process.env.WS_URL_TEST || 'wss://bsc-testnet.nodereal.io/ws/v1/289b94cae365454c977080778cf40483',
   
   // ID ของเครือข่าย
-  networkId: parseInt(process.env.NETWORK_ID) || 56, // BSC Mainnet
+  networkId: parseInt(process.env.NETWORK_ID) || 97, // BSC Testnet
   
   // ชื่อของเครือข่าย
-  networkName: process.env.NETWORK_NAME || 'Binance Smart Chain',
+  networkName: process.env.NETWORK_NAME || 'Binance Smart Chain Testnet',
   
   // จำนวนการยืนยันขั้นต่ำ
   minConfirmations: 1,

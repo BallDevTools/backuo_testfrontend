@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const { requireWalletAddress } = require('../middleware/auth');
 const contractService = require('../services/contract');
+const Web3 = require('web3');
+const config = require('../config/blockchain');
 
 // API ดึงข้อมูลแพลนทั้งหมด (จาก Smart Contract)
 router.get('/plans', async (req, res) => {
@@ -33,31 +35,41 @@ router.get('/members', async (req, res) => {
 });
 
 // API ตรวจสอบสถานะสมาชิก
-router.get('/members/check-member', requireWalletAddress, async (req, res) => {
-  try {
-    const { address } = req.query;
-    
-    // ตรวจสอบสถานะสมาชิกจาก Smart Contract
-    const isMemberStatus = await contractService.isMember(address);
-    
-    let memberInfo = null;
-    if (isMemberStatus) {
-      memberInfo = await contractService.getMemberInfo(address);
+router.get('/members/check-member', async (req, res) => {
+    try {
+        const { address } = req.query;
+
+        if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ที่อยู่กระเป๋าไม่ถูกต้อง'
+            });
+        }
+
+        // เชื่อมต่อกับ Web3
+        const web3 = new Web3(config.rpcUrl);
+        
+        // ใช้ contract ABI จาก config
+        const contract = new web3.eth.Contract(
+            config.contractABI,
+            config.contractAddress
+        );
+
+        // ตรวจสอบว่าเป็นสมาชิกหรือไม่
+        const balance = await contract.methods.balanceOf(address).call();
+        const isMember = balance > 0;
+
+        res.json({
+            success: true,
+            isMember: isMember
+        });
+    } catch (error) {
+        console.error('Error checking member status:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการตรวจสอบสถานะสมาชิก'
+        });
     }
-    
-    res.json({
-      address,
-      isMember: isMemberStatus,
-      planId: memberInfo ? memberInfo.planId : 0,
-      cycleNumber: memberInfo ? memberInfo.cycleNumber : 0,
-      registeredAt: memberInfo ? memberInfo.registeredAt : null,
-      totalReferrals: memberInfo ? memberInfo.totalReferrals : 0,
-      totalEarnings: memberInfo ? memberInfo.totalEarnings : 0
-    });
-  } catch (error) {
-    console.error('Error checking member status:', error);
-    res.status(500).json({ error: 'Failed to check member status', message: error.message });
-  }
 });
 
 // API ดึงข้อมูลสมาชิกรายบุคคล
@@ -239,6 +251,36 @@ router.get('/member-growth', async (req, res) => {
       data: [0, 0, 0, 0, 0, 0]
     });
   }
+});
+
+// เชื่อมต่อกระเป๋า
+router.post('/wallet/connect', async (req, res) => {
+    try {
+        const { address } = req.body;
+
+        // ตรวจสอบรูปแบบที่อยู่กระเป๋า
+        if (!address || !/^0x[a-fA-F0-9]{40}$/.test(address)) {
+            return res.status(400).json({
+                success: false,
+                message: 'ที่อยู่กระเป๋าไม่ถูกต้อง'
+            });
+        }
+
+        // บันทึกที่อยู่กระเป๋าลงใน session
+        req.session.walletAddress = address;
+
+        res.json({
+            success: true,
+            message: 'เชื่อมต่อกระเป๋าสำเร็จ',
+            address: address
+        });
+    } catch (error) {
+        console.error('Error connecting wallet:', error);
+        res.status(500).json({
+            success: false,
+            message: 'เกิดข้อผิดพลาดในการเชื่อมต่อกระเป๋า'
+        });
+    }
 });
 
 module.exports = router;

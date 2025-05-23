@@ -27,7 +27,7 @@ router.post('/login', async (req, res) => {
     }
     
     // ตรวจสอบรหัสผ่าน
-    const isMatch = await userService.comparePassword(password, user.password);
+    const isMatch = await userService.comparePassword(password, user.password_hash);
     
     if (!isMatch) {
       req.flash('error_msg', 'ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง');

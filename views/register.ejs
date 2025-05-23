@@ -1,5 +1,1869 @@
 <%- include('./partials/header') %>
 
+    <!-- เพิ่ม ABI ของสัญญา -->
+    <script>
+        const contractABI = [
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "approve",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_usdtToken",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "initialOwner",
+				"type": "address"
+			}
+		],
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"inputs": [],
+		"name": "AlreadyMember",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "CooldownActive",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ERC721EnumerableForbiddenBatchMint",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "ERC721IncorrectOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC721InsufficientApproval",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "approver",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidApprover",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidOperator",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "receiver",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidReceiver",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "sender",
+				"type": "address"
+			}
+		],
+		"name": "ERC721InvalidSender",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC721NonexistentToken",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "ERC721OutOfBoundsIndex",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "EmptyName",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "EmptyURI",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InactivePlan",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidAmount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidCycleMembers",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidDecimals",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidPlanID",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidRequest",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "InvalidRequests",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "LowFeeBalance",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "LowFundBalance",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "LowOwnerBalance",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NextPlanOnly",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NoPlanImage",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NoRequest",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NonTransferable",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NonexistentToken",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotMember",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "NotPaused",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "OwnableInvalidOwner",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "account",
+				"type": "address"
+			}
+		],
+		"name": "OwnableUnauthorizedAccount",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "Paused",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "Plan1Only",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "PriceTooLow",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ReentrancyGuardReentrantCall",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ReentrantTransfer",
+		"type": "error"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "token",
+				"type": "address"
+			}
+		],
+		"name": "SafeERC20FailedOperation",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ThirtyDayLock",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TimelockActive",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "TooSoon",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "UplineNotMember",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "UplinePlanLow",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ZeroAddress",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ZeroBalance",
+		"type": "error"
+	},
+	{
+		"inputs": [],
+		"name": "ZeroPrice",
+		"type": "error"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "approved",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Approval",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "ApprovalForAll",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"components": [
+					{
+						"internalType": "address",
+						"name": "recipient",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "balanceType",
+						"type": "uint256"
+					}
+				],
+				"internalType": "struct CryptoMembershipNFT.WithdrawalRequest[]",
+				"name": "requests",
+				"type": "tuple[]"
+			}
+		],
+		"name": "batchWithdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalOwner",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalFee",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "totalFund",
+				"type": "uint256"
+			}
+		],
+		"name": "BatchWithdrawalProcessed",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "cancelEmergencyWithdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "bool",
+				"name": "status",
+				"type": "bool"
+			}
+		],
+		"name": "ContractPaused",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_membersPerCycle",
+				"type": "uint256"
+			}
+		],
+		"name": "createPlan",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "emergencyWithdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "EmergencyWithdraw",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "EmergencyWithdrawInitiated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "timestamp",
+				"type": "uint256"
+			}
+		],
+		"name": "EmergencyWithdrawRequested",
+		"type": "event"
+	},
+	{
+		"inputs": [],
+		"name": "exitMembership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "ownerAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "feeAmount",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "fundAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "FundsDistributed",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "refundAmount",
+				"type": "uint256"
+			}
+		],
+		"name": "MemberExited",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "upline",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cycleNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "MemberRegistered",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "message",
+				"type": "string"
+			}
+		],
+		"name": "MembershipMinted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "newURI",
+				"type": "string"
+			}
+		],
+		"name": "MetadataUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cycleNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "NewCycleStarted",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "previousOwner",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "OwnershipTransferred",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "membersPerCycle",
+				"type": "uint256"
+			}
+		],
+		"name": "PlanCreated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "string",
+				"name": "imageURI",
+				"type": "string"
+			}
+		],
+		"name": "PlanDefaultImageSet",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "member",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "oldPlanId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newPlanId",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "cycleNumber",
+				"type": "uint256"
+			}
+		],
+		"name": "PlanUpgraded",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "newPriceFeed",
+				"type": "address"
+			}
+		],
+		"name": "PriceFeedUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "ReferralPaid",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "address",
+				"name": "_upline",
+				"type": "address"
+			}
+		],
+		"name": "registerMember",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "renounceOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "requestEmergencyWithdraw",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "restartAfterPause",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bytes",
+				"name": "data",
+				"type": "bytes"
+			}
+		],
+		"name": "safeTransferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			},
+			{
+				"internalType": "bool",
+				"name": "approved",
+				"type": "bool"
+			}
+		],
+		"name": "setApprovalForAll",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "string",
+				"name": "baseURI",
+				"type": "string"
+			}
+		],
+		"name": "setBaseURI",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bool",
+				"name": "_paused",
+				"type": "bool"
+			}
+		],
+		"name": "setPaused",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "_imageURI",
+				"type": "string"
+			}
+		],
+		"name": "setPlanDefaultImage",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "_isActive",
+				"type": "bool"
+			}
+		],
+		"name": "setPlanStatus",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_priceFeed",
+				"type": "address"
+			}
+		],
+		"name": "setPriceFeed",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "newDuration",
+				"type": "uint256"
+			}
+		],
+		"name": "TimelockUpdated",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "Transfer",
+		"type": "event"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "TransferAttemptBlocked",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "from",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "to",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "transferFrom",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "newOwner",
+				"type": "address"
+			}
+		],
+		"name": "transferOwnership",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "_newMembersPerCycle",
+				"type": "uint256"
+			}
+		],
+		"name": "updateMembersPerCycle",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_newPlanId",
+				"type": "uint256"
+			}
+		],
+		"name": "upgradePlan",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "upline",
+				"type": "address"
+			},
+			{
+				"indexed": true,
+				"internalType": "address",
+				"name": "downline",
+				"type": "address"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "downlineCurrentPlan",
+				"type": "uint256"
+			},
+			{
+				"indexed": false,
+				"internalType": "uint256",
+				"name": "downlineTargetPlan",
+				"type": "uint256"
+			}
+		],
+		"name": "UplineNotified",
+		"type": "event"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawFeeSystemBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawFundBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "amount",
+				"type": "uint256"
+			}
+		],
+		"name": "withdrawOwnerBalance",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			}
+		],
+		"name": "balanceOf",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "getApproved",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getContractStatus",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "isPaused",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalBalance",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "memberCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "currentPlanCount",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "hasEmergencyRequest",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "emergencyTimeRemaining",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "getNFTImage",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "imageURI",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_planId",
+				"type": "uint256"
+			}
+		],
+		"name": "getPlanCycleInfo",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "currentCycle",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "membersInCurrentCycle",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "membersPerCycle",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "_member",
+				"type": "address"
+			}
+		],
+		"name": "getReferralChain",
+		"outputs": [
+			{
+				"internalType": "address[]",
+				"name": "",
+				"type": "address[]"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "getSystemStats",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "totalMembers",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalRevenue",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalCommission",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "ownerFunds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "feeFunds",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "fundFunds",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "address",
+				"name": "operator",
+				"type": "address"
+			}
+		],
+		"name": "isApprovedForAll",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "isTokenTransferable",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "pure",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "MAX_MEMBERS_PER_CYCLE",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "members",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "upline",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalReferrals",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "totalEarnings",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "cycleNumber",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "registeredAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "ownerOf",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "planCycles",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "currentCycle",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "membersInCurrentCycle",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "planDefaultImages",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "plans",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "price",
+				"type": "uint256"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "membersPerCycle",
+				"type": "uint256"
+			},
+			{
+				"internalType": "bool",
+				"name": "isActive",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "priceFeed",
+		"outputs": [
+			{
+				"internalType": "address",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "bytes4",
+				"name": "interfaceId",
+				"type": "bytes4"
+			}
+		],
+		"name": "supportsInterface",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "symbol",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "TIMELOCK_DURATION",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenByIndex",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenImages",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "imageURI",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"internalType": "string",
+				"name": "description",
+				"type": "string"
+			},
+			{
+				"internalType": "uint256",
+				"name": "planId",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "createdAt",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "address",
+				"name": "owner",
+				"type": "address"
+			},
+			{
+				"internalType": "uint256",
+				"name": "index",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenOfOwnerByIndex",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "_tokenId",
+				"type": "uint256"
+			}
+		],
+		"name": "tokenURI",
+		"outputs": [
+			{
+				"internalType": "string",
+				"name": "",
+				"type": "string"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "totalSupply",
+		"outputs": [
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "usdtToken",
+		"outputs": [
+			{
+				"internalType": "contract IERC20",
+				"name": "",
+				"type": "address"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"inputs": [],
+		"name": "validateContractBalance",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			},
+			{
+				"internalType": "uint256",
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
+    </script>
+
     <section class="register py-5">
         <div class="container">
             <div class="row">
@@ -199,143 +2063,52 @@
                 const walletAddress = walletAddressInput.value;
                 const upline = uplineInput.value;
 
-                // ตรวจสอบที่อยู่กระเป๋า
-                if (!walletAddress) {
-                    alert('กรุณาเชื่อมต่อกระเป๋า Metamask ก่อนสมัครสมาชิก');
-                    return;
-                }
-
-                // ตรวจสอบรูปแบบที่อยู่กระเป๋า
-                if (!/^0x[a-fA-F0-9]{40}$/.test(walletAddress)) {
-                    alert('รูปแบบที่อยู่กระเป๋าไม่ถูกต้อง');
-                    return;
-                }
-
-                // ตรวจสอบที่อยู่ผู้แนะนำ (ถ้ามี)
-                if (upline && !/^0x[a-fA-F0-9]{40}$/.test(upline)) {
-                    alert('รูปแบบที่อยู่ผู้แนะนำไม่ถูกต้อง');
-                    return;
-                }
-
-                // ตรวจสอบว่าที่อยู่ผู้แนะนำไม่ใช่ตัวเอง
-                if (upline && upline.toLowerCase() === walletAddress.toLowerCase()) {
-                    alert('ไม่สามารถใช้ที่อยู่ของตัวเองเป็นผู้แนะนำได้');
-                    return;
-                }
-
-                // ตรวจสอบว่าผู้แนะนำเป็นสมาชิกหรือไม่ (ถ้ามีผู้แนะนำ)
-                if (upline) {
-                    try {
-                        // เช็คว่า upline มีรูปแบบถูกต้องหรือไม่
-                        if (!/^0x[a-fA-F0-9]{40}$/.test(upline)) {
-                            alert('รูปแบบที่อยู่ผู้แนะนำไม่ถูกต้อง');
-                            return;
-                        }
-
-                        console.log("ตรวจสอบผู้แนะนำ:", upline);
-                        const response = await fetch(`/api/members/check-member?address=${upline}`);
-
-                        if (!response.ok) {
-                            throw new Error(`HTTP error! status: ${response.status}`);
-                        }
-
-                        const data = await response.json();
-                        console.log("ข้อมูลผู้แนะนำ:", data);
-
-                        if (!data.isMember) {
-                            alert('ผู้แนะนำไม่ได้เป็นสมาชิก');
-                            return;
-                        }
-
-                        if (data.planId < 1) {
-                            alert('แพลนของผู้แนะนำต่ำกว่าแพลนที่คุณต้องการสมัคร');
-                            return;
-                        }
-                    } catch (error) {
-                        console.error('Error checking upline status:', error);
-                        alert('เกิดข้อผิดพลาดในการตรวจสอบสถานะผู้แนะนำ: ' + error.message);
+                try {
+                    // ตรวจสอบเครือข่าย
+                    const networkId = parseInt(document.querySelector('meta[name="network-id"]').content);
+                    const isCorrectNetwork = await window.app.checkNetwork(networkId);
+                    
+                    if (!isCorrectNetwork) {
+                        alert('กรุณาเปลี่ยนเครือข่ายเป็น ' + document.querySelector('meta[name="network-name"]').content);
                         return;
                     }
-                }
 
-                // ตรวจสอบการอนุญาตโทเคน
-                try {
-                    const allowance = await window.app.checkAllowance(usdtAddress, walletAddress, contractAddress);
-                    const requiredAmount = window.app.toWei(planPrice, 6); // USDT ใช้ทศนิยม 6 ตำแหน่ง
-
-                    if (BigInt(allowance) < BigInt(requiredAmount)) {
-                        alert('คุณยังไม่ได้อนุญาตโทเคน USDT กรุณาอนุญาตโทเคนก่อนสมัครสมาชิก');
-                        tokenApprovalSection.style.display = 'block';
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Error checking token allowance:', error);
-                    alert('เกิดข้อผิดพลาดในการตรวจสอบการอนุญาตโทเคน');
-                    return;
-                }
-
-                // ตรวจสอบยอดเงิน USDT
-                try {
-                    const balanceWei = await window.ethereum.request({
-                        method: 'eth_call',
-                        params: [{
-                            to: usdtAddress,
-                            data: `0x70a08231000000000000000000000000${walletAddress.slice(2)}`
-                        }, 'latest']
+                    // ส่งข้อมูลไปยัง API
+                    const response = await fetch('/register', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            walletAddress,
+                            upline
+                        })
                     });
 
-                    const balance = parseInt(balanceWei, 16) / 10 ** 6; // USDT มีทศนิยม 6 ตำแหน่ง
+                    const data = await response.json();
 
-                    if (balance < parseFloat(planPrice)) {
-                        alert(`ยอดเงิน USDT ของคุณไม่เพียงพอ (${balance.toFixed(2)} USDT) สำหรับการสมัครสมาชิก (${planPrice} USDT)`);
-                        return;
-                    }
-                } catch (error) {
-                    console.error('Error checking USDT balance:', error);
-                    alert('เกิดข้อผิดพลาดในการตรวจสอบยอดเงิน USDT');
-                    return;
-                }
+                    if (data.success) {
+                        // เรียกใช้ smart contract
+                        const web3 = new Web3(window.ethereum);
+                        const contract = new web3.eth.Contract(contractABI, contractAddress);
+                        
+                        // เรียกใช้ฟังก์ชัน registerMember โดยส่ง planId และ upline
+                        const result = await contract.methods.registerMember(1, upline || '0x0000000000000000000000000000000000000000').send({
+                            from: walletAddress
+                        });
 
-                // ตรวจสอบว่าเป็นเครือข่ายที่ถูกต้อง
-                try {
-                    const chainId = await window.ethereum.request({ method: 'eth_chainId' });
-                    const currentNetworkId = parseInt(chainId, 16);
-                    const requiredNetworkId = parseInt(document.querySelector('meta[name="network-id"]').content || '56');
-
-                    if (currentNetworkId !== requiredNetworkId) {
-                        if (confirm(`คุณกำลังใช้เครือข่ายที่ไม่ถูกต้อง ต้องการเปลี่ยนไปยังเครือข่าย ${document.querySelector('meta[name="network-name"]').content || 'Binance Smart Chain'} หรือไม่?`)) {
-                            try {
-                                await window.ethereum.request({
-                                    method: 'wallet_switchEthereumChain',
-                                    params: [{ chainId: '0x' + requiredNetworkId.toString(16) }]
-                                });
-
-                                // รอให้เปลี่ยนเครือข่ายเสร็จ
-                                setTimeout(() => {
-                                    alert('เปลี่ยนเครือข่ายสำเร็จ กรุณาสมัครสมาชิกอีกครั้ง');
-                                }, 1000);
-
-                                return;
-                            } catch (switchError) {
-                                if (switchError.code === 4902) {
-                                    alert('เครือข่ายที่ต้องการไม่มีในกระเป๋าของคุณ กรุณาเพิ่มเครือข่ายด้วยตนเอง');
-                                } else {
-                                    alert('เกิดข้อผิดพลาดในการเปลี่ยนเครือข่าย: ' + switchError.message);
-                                }
-                                return;
-                            }
+                        if (result.status) {
+                            alert('สมัครสมาชิกสำเร็จ!');
+                            window.location.href = '/user/dashboard';
                         } else {
-                            return;
+                            alert('เกิดข้อผิดพลาดในการสมัครสมาชิก');
                         }
+                    } else {
+                        alert(data.message || 'เกิดข้อผิดพลาดในการสมัครสมาชิก');
                     }
                 } catch (error) {
-                    console.error('Error checking network:', error);
-                }
-
-                // ยืนยันการสมัครสมาชิก
-                if (confirm('คุณแน่ใจหรือไม่ที่จะสมัครสมาชิก? การกระทำนี้จะโอน USDT จำนวน ' + planPrice + ' ออกจากกระเป๋าของคุณ')) {
-                    // ทุกอย่างผ่านการตรวจสอบแล้ว ส่งฟอร์ม
-                    this.submit();
+                    console.error('Error registering member:', error);
+                    alert('เกิดข้อผิดพลาดในการสมัครสมาชิก: ' + error.message);
                 }
             });
         });

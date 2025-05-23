@@ -9,7 +9,7 @@ const bcrypt = require('bcryptjs');
  */
 const getUserByUsername = async (username) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
+    const [rows] = await db.query('SELECT * FROM admin_users WHERE username = ?', [username]);
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {
     console.error('Error getting user by username:', error);
@@ -24,7 +24,7 @@ const getUserByUsername = async (username) => {
  */
 const getUserByWalletAddress = async (walletAddress) => {
   try {
-    const [rows] = await db.query('SELECT * FROM users WHERE walletAddress = ?', [walletAddress]);
+    const [rows] = await db.query('SELECT * FROM admin_users WHERE walletAddress = ?', [walletAddress]);
     return rows.length > 0 ? rows[0] : null;
   } catch (error) {
     console.error('Error getting user by wallet address:', error);
@@ -52,7 +52,7 @@ const createUser = async (username, password, role) => {
     
     // เพิ่มผู้ใช้ใหม่
     const [result] = await db.query(
-      'INSERT INTO users (username, password, role) VALUES (?, ?, ?)',
+      'INSERT INTO admin_users (username, password_hash, role) VALUES (?, ?, ?)',
       [username, hashedPassword, role]
     );
     
@@ -76,7 +76,7 @@ const createUser = async (username, password, role) => {
 const updateWalletAddress = async (userId, walletAddress) => {
   try {
     const [result] = await db.query(
-      'UPDATE users SET walletAddress = ? WHERE id = ?',
+      'UPDATE admin_users SET walletAddress = ? WHERE id = ?',
       [walletAddress, userId]
     );
     
@@ -101,7 +101,7 @@ const changePassword = async (userId, newPassword) => {
     
     // อัพเดทรหัสผ่าน
     const [result] = await db.query(
-      'UPDATE users SET password = ? WHERE id = ?',
+      'UPDATE admin_users SET password_hash = ? WHERE id = ?',
       [hashedPassword, userId]
     );
     
@@ -133,7 +133,7 @@ const comparePassword = async (password, hashedPassword) => {
  */
 const getAllUsers = async () => {
   try {
-    const [rows] = await db.query('SELECT id, username, role, walletAddress, createdAt FROM users');
+    const [rows] = await db.query('SELECT id, username, role, walletAddress, created_at FROM admin_users');
     return rows;
   } catch (error) {
     console.error('Error getting all users:', error);

@@ -1,9 +1,19 @@
-// services/contract.js - ตัวจัดการการเชื่อมต่อกับสัญญาอัจฉริยะ
+// services/contract.js - ตัวจัดการการเชื่อมต่อกับสัญญาอัจฉริยะ (แก้ไข Circular Dependency)
 const Web3 = require('web3');
 const contractConfig = require('../config/blockchain');
+const fs = require('fs');
+const path = require('path');
 
-// ABI ของสัญญา CryptoMembershipNFT
-const contractABI = require('../config/contractABI.json');
+// โหลด ABI จากไฟล์
+let contractABI;
+try {
+  const abiPath = path.join(__dirname, '../config/contractABI.json');
+  const abiData = fs.readFileSync(abiPath, 'utf8');
+  contractABI = JSON.parse(abiData);
+} catch (error) {
+  console.error('Error loading contract ABI:', error);
+  throw new Error('ไม่สามารถโหลด ABI ของสัญญาได้');
+}
 
 // ตั้งค่า Web3 provider
 let web3;
@@ -256,13 +266,6 @@ const getMemberTransactions = async (walletAddress) => {
  */
 const getAllPlans = async () => {
   try {
-    // ในสัญญาของคุณ ไม่มีฟังก์ชัน state ที่สามารถใช้ได้ตรงๆ
-    // แทนที่จะใช้ state.planCount ให้เราดึงข้อมูลจากตัวแปร planCount โดยตรง
-    
-    // เนื่องจากไม่สามารถเข้าถึงตัวแปร state ได้โดยตรง 
-    // เราจะดึงข้อมูลแพลนโดยลองตั้งแต่ ID 1 ถึง 16 (ตามที่เห็นในสัญญา) 
-    // และจับข้อผิดพลาดถ้าแพลนไม่มีอยู่
-    
     const plans = [];
     let planCount = 16; // กำหนดค่าตั้งต้นตามที่เห็นในสัญญา
     
@@ -850,23 +853,58 @@ const getReferralChain = async (memberAddress) => {
 };
 
 /**
- * ตรวจสอบความถูกต้องของยอดเงินในสัญญา
- * @returns {Promise<Object>} ผลการตรวจสอบ
+ * ตรวจสอบยอดเงินในสัญญา
+ * @returns {Promise<Object>} ผลการตรวจสอบยอดเงิน
  */
 const validateContractBalance = async () => {
   try {
-    const result = await contractInstance.methods.validateContractBalance().call();
+    // ดึงยอดเงินแต่ละส่วน
+    const ownerFunds = await contractInstance.methods.ownerFunds().call();
+    const feeFunds = await contractInstance.methods.feeFunds().call();
+    const fundFunds = await contractInstance.methods.fundFunds().call();
+    
+    // ดึงยอดเงินทั้งหมดในสัญญา
+    const contractBalance = await web3.eth.getBalance(contractInstance.options.address);
+    
+    // คำนวณยอดเงินที่คาดหวัง
+    const expectedBalance = web3.utils.toBN(ownerFunds)
+      .add(web3.utils.toBN(feeFunds))
+      .add(web3.utils.toBN(fundFunds));
+    
+    // ตรวจสอบความถูกต้อง
+    const isValid = contractBalance === expectedBalance.toString();
+    
     return {
-      isValid: result[0],
-      expectedBalance: web3.utils.fromWei(result[1], 'ether'),
-      actualBalance: web3.utils.fromWei(result[2], 'ether')
+      expectedBalance: web3.utils.fromWei(expectedBalance, 'ether'),
+      actualBalance: web3.utils.fromWei(contractBalance, 'ether'),
+      isValid
     };
   } catch (error) {
     console.error('Error validating contract balance:', error);
+    throw error;
+  }
+};
+
+/**
+ * ดึงข้อมูล Plan Cycle Info
+ * @param {number} planId รหัสแพลน
+ * @returns {Promise<Object>} ข้อมูล cycle ของแพลน
+ */
+const getPlanCycleInfo = async (planId) => {
+  try {
+    const cycleInfo = await contractInstance.methods.getPlanCycleInfo(planId).call();
+    return {
+      currentCycle: parseInt(cycleInfo.currentCycle),
+      membersInCurrentCycle: parseInt(cycleInfo.membersInCurrentCycle),
+      membersPerCycle: parseInt(cycleInfo.membersPerCycle)
+    };
+  } catch (error) {
+    console.error('Error getting plan cycle info:', error);
     throw new Error(handleContractError(error));
   }
 };
 
+// Export ฟังก์ชันทั้งหมดโดยตรง ไม่ต้อง require ตัวเอง
 module.exports = {
   // Member functions
   isMember,
@@ -879,28 +917,39 @@ module.exports = {
   getSystemStats,
   getTodayMemberStats,
   
-  getAllPlans: require('./contract').getAllPlans,
-
-  registerMember: require('./contract').registerMember,
-  upgradePlan: require('./contract').upgradePlan,
-  exitMembership: require('./contract').exitMembership,
-
-  getContractStatus: require('./contract').getContractStatus,
-  withdrawBalance: require('./contract').withdrawBalance,
-  batchWithdraw: require('./contract').batchWithdraw,
-  requestEmergencyWithdraw: require('./contract').requestEmergencyWithdraw,
-  emergencyWithdraw: require('./contract').emergencyWithdraw,
-  cancelEmergencyWithdraw: require('./contract').cancelEmergencyWithdraw,
-  setPaused: require('./contract').setPaused,
-  setPlanStatus: require('./contract').setPlanStatus,
-  setPlanDefaultImage: require('./contract').setPlanDefaultImage,
-  setBaseURI: require('./contract').setBaseURI,
-  updateMembersPerCycle: require('./contract').updateMembersPerCycle,
-  setPriceFeed: require('./contract').setPriceFeed,
-  getNFTImage: require('./contract').getNFTImage,
-  getTokenId: require('./contract').getTokenId,
-  getTokenMetadata: require('./contract').getTokenMetadata,
+  // Plan functions
+  getAllPlans,
+  getPlanCycleInfo,
   
-  getReferralChain: require('./contract').getReferralChain,
-  validateContractBalance: require('./contract').validateContractBalance
+  // Transaction functions
+  registerMember,
+  upgradePlan,
+  exitMembership,
+  
+  // Contract status functions
+  getContractStatus,
+  validateContractBalance,
+  
+  // Withdrawal functions
+  withdrawBalance,
+  batchWithdraw,
+  requestEmergencyWithdraw,
+  emergencyWithdraw,
+  cancelEmergencyWithdraw,
+  
+  // Admin functions
+  setPaused,
+  setPlanStatus,
+  setPlanDefaultImage,
+  setBaseURI,
+  updateMembersPerCycle,
+  setPriceFeed,
+  
+  // NFT functions
+  getNFTImage,
+  getTokenId,
+  getTokenMetadata,
+  
+  // Referral functions
+  getReferralChain
 };
