@@ -32,9 +32,21 @@
     <!-- เช็คว่าเป็นหน้า dashboard หรือไม่ -->
     <% if (title.includes('แดชบอร์ด') || title.includes('Admin') || title.includes('Owner')) { %>
         <!-- รวมเมนู sidebar สำหรับ dashboard -->
-        <% if (role === 'admin') { %>
+        <% 
+        // กำหนด role ตาม title และ role จาก session
+        let userRole = 'user'; // default
+        if (typeof role !== 'undefined') {
+            userRole = role;
+        } else if (title.includes('Admin')) {
+            userRole = 'admin';
+        } else if (title.includes('Owner') || title.includes('เจ้าของระบบ')) {
+            userRole = 'owner';
+        }
+        %>
+        
+        <% if (userRole === 'admin') { %>
             <%- include('./admin-sidebar') %>
-        <% } else if (role === 'owner') { %>
+        <% } else if (userRole === 'owner') { %>
             <%- include('./owner-sidebar') %>
         <% } else { %>
             <%- include('./user-sidebar') %>
@@ -48,7 +60,7 @@
             <div class="dashboard-header">
                 <h1 class="dashboard-title"><%= title %></h1>
                 <div class="dashboard-actions">
-                    <% if (user) { %>
+                    <% if (typeof user !== 'undefined' && user) { %>
                         <!-- ศูนย์การแจ้งเตือน -->
                         <div class="notification-center-wrapper">
                             <div class="notification-center">
@@ -83,7 +95,7 @@
                         </div>
                     <% } %>
                     
-                    <% if (!walletAddress) { %>
+                    <% if (typeof walletAddress === 'undefined' || !walletAddress) { %>
                         <button id="connect-wallet-btn" class="btn btn-primary">
                             <i class="fas fa-wallet"></i> เชื่อมต่อกระเป๋า
                         </button>
@@ -97,13 +109,13 @@
             </div>
             
             <!-- แสดงข้อความแจ้งเตือน -->
-            <% if(success_msg != ''){ %>
+            <% if(typeof success_msg !== 'undefined' && success_msg != ''){ %>
                 <div class="alert alert-success">
                     <%= success_msg %>
                 </div>
             <% } %>
             
-            <% if(error_msg != ''){ %>
+            <% if(typeof error_msg !== 'undefined' && error_msg != ''){ %>
                 <div class="alert alert-danger">
                     <%= error_msg %>
                 </div>
@@ -126,9 +138,19 @@
                     <li class="nav-item">
                         <a href="/contact" class="nav-link">ติดต่อเรา</a>
                     </li>
-                    <% if (user) { %>
+                    <% if (typeof user !== 'undefined' && user) { %>
                         <li class="nav-item">
-                            <a href="/<%= role %>/dashboard" class="nav-link">แดชบอร์ด</a>
+                            <% 
+                            let dashboardUrl = '/user/dashboard';
+                            if (typeof role !== 'undefined') {
+                                if (role === 'admin') {
+                                    dashboardUrl = '/admin/dashboard';
+                                } else if (role === 'owner') {
+                                    dashboardUrl = '/owner/dashboard';
+                                }
+                            }
+                            %>
+                            <a href="<%= dashboardUrl %>" class="nav-link">แดชบอร์ด</a>
                         </li>
                         <li class="nav-item">
                             <a href="/auth/logout" class="nav-link">ออกจากระบบ</a>
@@ -179,13 +201,13 @@
         
         <!-- แสดงข้อความแจ้งเตือน -->
         <div class="container mt-3">
-            <% if(success_msg != ''){ %>
+            <% if(typeof success_msg !== 'undefined' && success_msg != ''){ %>
                 <div class="alert alert-success">
                     <%= success_msg %>
                 </div>
             <% } %>
             
-            <% if(error_msg != ''){ %>
+            <% if(typeof error_msg !== 'undefined' && error_msg != ''){ %>
                 <div class="alert alert-danger">
                     <%= error_msg %>
                 </div>
@@ -594,6 +616,23 @@
     .notification-footer {
         padding: 10px 15px;
         border-top: 1px solid #eee;
+    }
+    
+    /* เพิ่ม CSS สำหรับการแยก separator ใน sidebar */
+    .dashboard-nav-separator {
+        padding: 0.5rem 1.5rem;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: rgba(255, 255, 255, 0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-top: 1rem;
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    
+    .dashboard-nav-separator:first-child {
+        margin-top: 0;
+        border-top: none;
     }
     
     @media (max-width: 576px) {

@@ -46,18 +46,8 @@ router.get('/members/check-member', async (req, res) => {
             });
         }
 
-        // เชื่อมต่อกับ Web3
-        const web3 = new Web3(config.rpcUrl);
-        
-        // ใช้ contract ABI จาก config
-        const contract = new web3.eth.Contract(
-            config.contractABI,
-            config.contractAddress
-        );
-
-        // ตรวจสอบว่าเป็นสมาชิกหรือไม่
-        const balance = await contract.methods.balanceOf(address).call();
-        const isMember = balance > 0;
+        // ใช้ contract service แทนการสร้าง contract instance เอง
+        const isMember = await contractService.isMember(address);
 
         res.json({
             success: true,

@@ -9,7 +9,7 @@
         <div class="dashboard-user-avatar">
             <i class="fas fa-user-shield"></i>
         </div>
-        <div class="dashboard-user-name"><%= user.username %></div>
+        <div class="dashboard-user-name"><%= user ? user.username : 'แอดมิน' %></div>
         <div class="dashboard-user-role">แอดมิน</div>
     </div>
     
@@ -42,6 +42,12 @@
             <a href="/admin/settings" class="dashboard-nav-link <%= title === 'ตั้งค่าระบบ' ? 'active' : '' %>">
                 <i class="fas fa-cog dashboard-nav-icon"></i>
                 ตั้งค่าระบบ
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/auth/add-admin" class="dashboard-nav-link <%= title === 'เพิ่มผู้ดูแลระบบ' ? 'active' : '' %>">
+                <i class="fas fa-user-plus dashboard-nav-icon"></i>
+                เพิ่มแอดมิน
             </a>
         </div>
         <div class="dashboard-nav-item">

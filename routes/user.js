@@ -203,7 +203,7 @@ router.post('/connect-wallet', isAuthenticated, isUser, async (req, res) => {
     
     req.session.walletAddress = walletAddress;
     req.flash('success_msg', 'เชื่อมต่อกระเป๋าสำเร็จ');
-    res.redirect('/user/dashboard');
+    res.redirect('/dashboard');
   } catch (error) {
     console.error('Error connecting wallet:', error);
     req.flash('error_msg', 'เกิดข้อผิดพลาดในการเชื่อมต่อกระเป๋า: ' + error.message);

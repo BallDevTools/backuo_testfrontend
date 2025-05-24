@@ -1,4 +1,4 @@
-// app.js - เริ่มต้นแอปพลิเคชัน Express (Decentralized Version)
+// app.js - เริ่มต้นแอปพลิเคชัน Express (เวอร์ชันแบบกระจายศูนย์)
 const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
@@ -16,6 +16,7 @@ const authRoutes = require('./routes/auth');
 const adminRoutes = require('./routes/admin');
 const ownerRoutes = require('./routes/owner');
 const apiRoutes = require('./routes/api');
+const userRoutes = require('./routes/user');
 
 // เชื่อมต่อกับฐานข้อมูล MySQL (เฉพาะ admin users)
 require('./config/database');
@@ -75,6 +76,7 @@ app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
 app.use('/owner', ownerRoutes);
 app.use('/api', apiRoutes);
+app.use('/user', userRoutes);
 
 // Routes สำหรับผู้ใช้ทั่วไป (ไม่ต้องการ login - ใช้ wallet เท่านั้น)
 app.get('/connect-wallet', (req, res) => {

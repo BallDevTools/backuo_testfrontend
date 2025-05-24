@@ -9,13 +9,13 @@
         <div class="dashboard-user-avatar">
             <i class="fas fa-user"></i>
         </div>
-        <div class="dashboard-user-name"><%= user.username %></div>
+        <div class="dashboard-user-name"><%= user ? user.username : 'สมาชิก' %></div>
         <div class="dashboard-user-role">สมาชิก</div>
     </div>
     
     <nav class="dashboard-nav">
         <div class="dashboard-nav-item">
-            <a href="/dashboard" class="dashboard-nav-link <%= title === 'แดชบอร์ดสมาชิก' ? 'active' : '' %>">
+            <a href="/user/dashboard" class="dashboard-nav-link <%= title === 'แดชบอร์ดสมาชิก' ? 'active' : '' %>">
                 <i class="fas fa-tachometer-alt dashboard-nav-icon"></i>
                 แดชบอร์ด
             </a>
@@ -42,6 +42,12 @@
             <a href="/user/connect-wallet" class="dashboard-nav-link <%= title === 'เชื่อมต่อกระเป๋า Metamask' ? 'active' : '' %>">
                 <i class="fas fa-wallet dashboard-nav-icon"></i>
                 เชื่อมต่อกระเป๋า
+            </a>
+        </div>
+        <div class="dashboard-nav-item">
+            <a href="/user/notifications" class="dashboard-nav-link <%= title === 'การแจ้งเตือน' ? 'active' : '' %>">
+                <i class="fas fa-bell dashboard-nav-icon"></i>
+                การแจ้งเตือน
             </a>
         </div>
         <div class="dashboard-nav-item">

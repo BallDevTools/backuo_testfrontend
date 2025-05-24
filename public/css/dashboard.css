@@ -329,3 +329,178 @@
     grid-template-columns: 1fr;
   }
 }
+/* เพิ่มใน public/css/dashboard.css */
+
+/* Sidebar Navigation Separator */
+.dashboard-nav-separator {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: rgba(255, 255, 255, 0.6);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.dashboard-nav-separator:first-child {
+  margin-top: 0;
+  border-top: none;
+}
+
+/* User Avatar Icons */
+.dashboard-user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  margin: 0 auto 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: #ecf0f1;
+}
+
+/* User Role Specific Colors */
+.dashboard-sidebar .dashboard-user-avatar {
+  background-color: #3498db; /* สำหรับ user ทั่วไป */
+}
+
+/* Admin Avatar */
+body:has(.dashboard-user-role:contains("แอดมิน")) .dashboard-user-avatar,
+.dashboard-user-role:contains("แอดมิน") ~ .dashboard-user-avatar {
+  background-color: #2ecc71; /* สีเขียวสำหรับ admin */
+}
+
+/* Owner Avatar */
+body:has(.dashboard-user-role:contains("เจ้าของระบบ")) .dashboard-user-avatar,
+.dashboard-user-role:contains("เจ้าของระบบ") ~ .dashboard-user-avatar {
+  background-color: #f39c12; /* สีทองสำหรับ owner */
+}
+
+/* Navigation Link Hover Effects */
+.dashboard-nav-link {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1.5rem;
+  color: #ecf0f1;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.dashboard-nav-link:before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
+  transition: left 0.5s;
+}
+
+.dashboard-nav-link:hover:before {
+  left: 100%;
+}
+
+.dashboard-nav-link:hover, 
+.dashboard-nav-link.active {
+  background-color: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  transform: translateX(5px);
+}
+
+.dashboard-nav-link.active {
+  border-right: 3px solid #3498db;
+}
+
+/* Role-specific active link colors */
+.dashboard-user-role:contains("แอดมิน") ~ nav .dashboard-nav-link:hover,
+.dashboard-user-role:contains("แอดมิน") ~ nav .dashboard-nav-link.active {
+  background-color: rgba(46, 204, 113, 0.2);
+  color: #2ecc71;
+}
+
+.dashboard-user-role:contains("แอดมิน") ~ nav .dashboard-nav-link.active {
+  border-right-color: #2ecc71;
+}
+
+.dashboard-user-role:contains("เจ้าของระบบ") ~ nav .dashboard-nav-link:hover,
+.dashboard-user-role:contains("เจ้าของระบบ") ~ nav .dashboard-nav-link.active {
+  background-color: rgba(243, 156, 18, 0.2);
+  color: #f39c12;
+}
+
+.dashboard-user-role:contains("เจ้าของระบบ") ~ nav .dashboard-nav-link.active {
+  border-right-color: #f39c12;
+}
+
+/* Icon spacing */
+.dashboard-nav-icon {
+  margin-right: 0.75rem;
+  width: 20px;
+  text-align: center;
+  font-size: 1rem;
+}
+
+/* Responsive improvements */
+@media (max-width: 992px) {
+  .dashboard-sidebar {
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+  }
+  
+  .dashboard-sidebar.show {
+      transform: translateX(0);
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .dashboard-content {
+      margin-left: 0;
+      transition: margin-left 0.3s ease;
+  }
+  
+  .dashboard-toggle {
+      display: block;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      z-index: 1001;
+      background-color: #3498db;
+      color: #ecf0f1;
+      border: none;
+      border-radius: 4px;
+      padding: 0.5rem;
+      cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  }
+}
+
+/* Animation for sidebar items */
+@keyframes slideInFromLeft {
+  from {
+      opacity: 0;
+      transform: translateX(-20px);
+  }
+  to {
+      opacity: 1;
+      transform: translateX(0);
+  }
+}
+
+.dashboard-nav-item {
+  animation: slideInFromLeft 0.3s ease forwards;
+}
+
+.dashboard-nav-item:nth-child(1) { animation-delay: 0.1s; }
+.dashboard-nav-item:nth-child(2) { animation-delay: 0.2s; }
+.dashboard-nav-item:nth-child(3) { animation-delay: 0.3s; }
+.dashboard-nav-item:nth-child(4) { animation-delay: 0.4s; }
+.dashboard-nav-item:nth-child(5) { animation-delay: 0.5s; }
+.dashboard-nav-item:nth-child(6) { animation-delay: 0.6s; }
+.dashboard-nav-item:nth-child(7) { animation-delay: 0.7s; }
+.dashboard-nav-item:nth-child(8) { animation-delay: 0.8s; }
+.dashboard-nav-item:nth-child(9) { animation-delay: 0.9s; }
+.dashboard-nav-item:nth-child(10) { animation-delay: 1.0s; }
